@@ -7,7 +7,7 @@ import pytest
 from pyrogram import Client, raw
 from pyrogram.errors import FilePartMissing
 from pyrogram.file_id import FileType
-from pyrogram.raw.core import TLObject
+from pyrogram.raw.core import BoolTrue, TLObject
 
 from telefeeds import TelegramRPCError
 from telefeeds.pyrogram import Router, Telefeeds
@@ -42,7 +42,7 @@ class FakeGateway:
                 mtime=0,
                 bytes=b"downloaded",
             ).write()
-        return raw.types.BoolTrue().write()
+        return BoolTrue()
 
 
 @pytest.mark.asyncio
@@ -124,4 +124,24 @@ async def test_download_forces_cdn_off_and_routes_to_file_dc() -> None:
     assert session_peer_id == 100
     assert dc_id == 4
     assert request.cdn_supported is False
+    await app.stop_async()
+
+
+@pytest.mark.asyncio
+async def test_upload_uses_file_parts_through_grpc_session() -> None:
+    gateway = FakeGateway()
+    app = Telefeeds("token", gateway=gateway)
+    client = await app.get_client(100)
+    source = BytesIO(b"upload payload")
+    source.name = "payload.bin"
+
+    uploaded = await client.save_file(source)
+
+    assert isinstance(uploaded, raw.types.InputFile)
+    session_peer_id, request, dc_id = gateway.requests[-1]
+    assert session_peer_id == 100
+    assert dc_id is None
+    assert isinstance(request, raw.functions.upload.SaveFilePart)
+    assert request.bytes == b"upload payload"
+    assert client.media_stats.uploaded_bytes == len(request.bytes)
     await app.stop_async()
