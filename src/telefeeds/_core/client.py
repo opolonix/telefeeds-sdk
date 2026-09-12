@@ -114,6 +114,7 @@ class TelefeedsClient:
         if close_other is not None:
             request.close_other = close_other
         call = self.require_stub().Subscribe(request, metadata=self.metadata)
+        await call.initial_metadata()
         async for event in call:
             received_at = (
                 event.received_at.ToDatetime(tzinfo=timezone.utc)

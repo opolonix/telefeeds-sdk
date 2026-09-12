@@ -1,5 +1,5 @@
 from .client import TelefeedsClient
-from .errors import GatewayInvokeError, TelegramRPCError
+from .errors import GatewayInvokeError, SubscriptionReplacedError, TelegramRPCError
 from .models import (
     AuthorizationChallenge,
     AuthorizationResult,
@@ -16,6 +16,7 @@ __all__ = [
     "GatewayInvokeError",
     "SessionRegistration",
     "SessionSnapshot",
+    "SubscriptionReplacedError",
     "TelefeedsClient",
     "TelegramRPCError",
     "UpdateEnvelope",

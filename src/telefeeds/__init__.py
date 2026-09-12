@@ -5,6 +5,7 @@ from ._core import (
     GatewayInvokeError,
     SessionRegistration,
     SessionSnapshot,
+    SubscriptionReplacedError,
     TelefeedsClient,
     TelegramRPCError,
     UpdateEnvelope,
@@ -17,9 +18,10 @@ __all__ = [
     "GatewayInvokeError",
     "SessionRegistration",
     "SessionSnapshot",
+    "SubscriptionReplacedError",
     "TelefeedsClient",
     "TelegramRPCError",
     "UpdateEnvelope",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"

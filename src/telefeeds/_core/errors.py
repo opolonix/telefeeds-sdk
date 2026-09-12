@@ -5,6 +5,10 @@ class GatewayInvokeError(RuntimeError):
     """A request reached Telefeeds but failed before Telegram returned an RPC error."""
 
 
+class SubscriptionReplacedError(RuntimeError):
+    """The update subscription was explicitly replaced through close_other."""
+
+
 class TelegramRPCError(RuntimeError):
     """A structured Telegram RPC error independent of a particular TL library."""
 

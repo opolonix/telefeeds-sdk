@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import asyncio
 from io import BytesIO
 from types import SimpleNamespace
 
+import grpc
 import pytest
 from pyrogram import Client, raw
 from pyrogram.errors import FilePartMissing
 from pyrogram.file_id import FileType
 from pyrogram.raw.core import BoolTrue, TLObject
 
-from telefeeds import TelegramRPCError
+from telefeeds import SubscriptionReplacedError, TelegramRPCError
 from telefeeds.pyrogram import Router, Telefeeds
 
 
@@ -18,12 +20,32 @@ class FakeGateway:
         self.requests: list[tuple[int, object, int | None]] = []
         self.tl_layers: list[int] = []
         self.rpc_error: TelegramRPCError | None = None
+        self.open_errors: list[BaseException] = []
+        self.open_attempts = 0
+        self.subscription_events: asyncio.Queue[object] = asyncio.Queue()
+        self.subscription_attempts = 0
 
     async def open(self, *, timeout: float | None = None):
+        self.open_attempts += 1
+        if self.open_errors:
+            raise self.open_errors.pop(0)
         return self
 
     async def close(self) -> None:
         return None
+
+    async def subscribe(
+        self,
+        *,
+        interface: int | None = None,
+        close_other: bool | None = None,
+        tl_layer: int,
+    ):
+        self.subscription_attempts += 1
+        event = await self.subscription_events.get()
+        if isinstance(event, BaseException):
+            raise event
+        yield event
 
     async def invoke_raw(
         self,
@@ -72,6 +94,72 @@ def test_tl_layer_uses_installed_schema_and_allows_override() -> None:
     assert Telefeeds("token", tl_layer=227, gateway=FakeGateway()).tl_layer == 227
     with pytest.raises(ValueError, match="between 227 and 229"):
         Telefeeds("token", tl_layer=226, gateway=FakeGateway())
+
+
+@pytest.mark.asyncio
+async def test_start_retries_until_server_is_available() -> None:
+    gateway = FakeGateway()
+    gateway.open_errors.append(TimeoutError())
+    app = Telefeeds(
+        "token",
+        gateway=gateway,
+        reconnect_initial_delay=0.001,
+        reconnect_max_delay=0.002,
+    )
+
+    await app.start_async()
+
+    assert gateway.open_attempts == 2
+    await app.stop_async()
+
+
+@pytest.mark.asyncio
+async def test_update_stream_reconnects_after_unavailable() -> None:
+    gateway = FakeGateway()
+    await gateway.subscription_events.put(
+        grpc.aio.AioRpcError(grpc.StatusCode.UNAVAILABLE)
+    )
+    app = Telefeeds(
+        "token",
+        gateway=gateway,
+        reconnect_initial_delay=0.001,
+        reconnect_max_delay=0.002,
+    )
+    await app.start_async()
+
+    for attempt in range(100):
+        if gateway.subscription_attempts >= 2:
+            break
+        await asyncio.sleep(0.001)
+
+    assert attempt < 99
+    assert gateway.subscription_attempts == 2
+    await app.stop_async()
+
+
+@pytest.mark.asyncio
+async def test_close_other_revocation_is_not_reconnected() -> None:
+    gateway = FakeGateway()
+    await gateway.subscription_events.put(
+        grpc.aio.AioRpcError(
+            grpc.StatusCode.CANCELLED,
+            details="channel was replaced by close_other",
+        )
+    )
+    app = Telefeeds(
+        "token",
+        gateway=gateway,
+        reconnect_initial_delay=0.001,
+        reconnect_max_delay=0.002,
+    )
+    await app.start_async()
+    assert app.subscription_task is not None
+
+    with pytest.raises(SubscriptionReplacedError):
+        await app.subscription_task
+
+    assert gateway.subscription_attempts == 1
+    await app.stop_async()
 
 
 @pytest.mark.asyncio

@@ -11,13 +11,22 @@ from pyrogram import handlers
 from pyrogram.raw.core import TLObject
 from typing_extensions import Self
 
-from telefeeds._core import TelefeedsClient
+from telefeeds._core import SubscriptionReplacedError, TelefeedsClient
 
 from .client import MediaStats, TelefeedsClientMixin
 from .registrar import HandlerRegistrar
 from .session import GrpcSession
 
 log = logging.getLogger(__name__)
+
+RETRYABLE_SUBSCRIPTION_CODES = {
+    grpc.StatusCode.ABORTED,
+    grpc.StatusCode.DEADLINE_EXCEEDED,
+    grpc.StatusCode.INTERNAL,
+    grpc.StatusCode.RESOURCE_EXHAUSTED,
+    grpc.StatusCode.UNAVAILABLE,
+    grpc.StatusCode.UNKNOWN,
+}
 
 
 class Telefeeds(HandlerRegistrar):
@@ -39,6 +48,7 @@ class Telefeeds(HandlerRegistrar):
         invoke_timeout: float = 30.0,
         media_part_timeout: float = 95.0,
         media_retries: int = 3,
+        reconnect_initial_delay: float = 0.5,
         reconnect_max_delay: float = 30.0,
         gateway: TelefeedsClient | None = None,
     ) -> None:
@@ -75,6 +85,14 @@ class Telefeeds(HandlerRegistrar):
         self.connect_timeout = connect_timeout
         self.media_part_timeout = media_part_timeout
         self.media_retries = media_retries
+        if reconnect_initial_delay <= 0:
+            raise ValueError("reconnect_initial_delay must be greater than zero")
+        if reconnect_max_delay < reconnect_initial_delay:
+            raise ValueError(
+                "reconnect_max_delay must be greater than or equal to "
+                "reconnect_initial_delay"
+            )
+        self.reconnect_initial_delay = reconnect_initial_delay
         self.reconnect_max_delay = reconnect_max_delay
         self.gateway = gateway or TelefeedsClient(
             token,
@@ -95,9 +113,32 @@ class Telefeeds(HandlerRegistrar):
 
     async def start_async(self) -> Self:
         if self.subscription_task is not None:
+            if self.subscription_task.done():
+                self.subscription_task.result()
             return self
-        await self.gateway.open(timeout=self.connect_timeout)
         self.stopping = False
+        reconnect_delay = self.reconnect_initial_delay
+        while True:
+            try:
+                await self.gateway.open(timeout=self.connect_timeout)
+                break
+            except (TimeoutError, grpc.aio.AioRpcError) as error:
+                error_name = (
+                    error.code().name
+                    if isinstance(error, grpc.aio.AioRpcError)
+                    else type(error).__name__
+                )
+                log.warning(
+                    "Telefeeds server is unavailable during startup (%s); "
+                    "reconnecting in %.1fs",
+                    error_name,
+                    reconnect_delay,
+                )
+                await asyncio.sleep(reconnect_delay)
+                reconnect_delay = min(
+                    reconnect_delay * 2,
+                    self.reconnect_max_delay,
+                )
         self.subscription_task = asyncio.create_task(
             self.consume_updates(),
             name="telefeeds-updates",
@@ -136,11 +177,16 @@ class Telefeeds(HandlerRegistrar):
         self.subscription_task = None
         current_task = asyncio.current_task()
         if task is not None and task is not current_task:
-            task.cancel()
-            try:
-                await task
-            except asyncio.CancelledError:
+            if task.cancelled():
                 pass
+            elif task.done():
+                task.exception()
+            else:
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
         for client in list(self.clients.values()):
             disconnect_handler = getattr(handlers, "DisconnectHandler", None)
             stop_handler = getattr(handlers, "StopHandler", None)
@@ -228,7 +274,7 @@ class Telefeeds(HandlerRegistrar):
         return await client.invoke(query, **kwargs)
 
     async def consume_updates(self) -> None:
-        reconnect_delay = 0.5
+        reconnect_delay = self.reconnect_initial_delay
         while not self.stopping:
             try:
                 async for envelope in self.gateway.subscribe(
@@ -262,21 +308,31 @@ class Telefeeds(HandlerRegistrar):
                             client.dispatcher.updates_queue.get_nowait()
                         )
                         await self.resolve(client, update, users, chats)
+                if self.stopping:
+                    return
+                log.warning(
+                    "Telefeeds update stream ended; reconnecting in %.1fs",
+                    reconnect_delay,
+                )
             except asyncio.CancelledError:
                 raise
             except grpc.aio.AioRpcError as error:
-                if error.code() in {
-                    grpc.StatusCode.PERMISSION_DENIED,
-                    grpc.StatusCode.UNAUTHENTICATED,
-                }:
+                if (
+                    error.code() == grpc.StatusCode.CANCELLED
+                    and error.details() == "channel was replaced by close_other"
+                ):
+                    raise SubscriptionReplacedError(
+                        "update subscription was replaced by a close_other connection"
+                    ) from error
+                if error.code() not in RETRYABLE_SUBSCRIPTION_CODES:
                     raise
                 log.warning(
                     "Telefeeds update stream disconnected (%s); reconnecting in %.1fs",
                     error.code().name,
                     reconnect_delay,
                 )
-                await asyncio.sleep(reconnect_delay)
-                reconnect_delay = min(reconnect_delay * 2, self.reconnect_max_delay)
+            await asyncio.sleep(reconnect_delay)
+            reconnect_delay = min(reconnect_delay * 2, self.reconnect_max_delay)
 
     async def get_session_snapshots(
         self, session_peer_ids: list[int] | tuple[int, ...] = ()
