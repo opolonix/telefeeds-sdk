@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package telefeeds.telegram.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Public Telegram user-session gateway. Every RPC requires the metadata header
+// `authorization: Bearer <integration_access_token>`.
+service TelegramGateway {
+  rpc Subscribe(SubscribeRequest) returns (stream UpdateEnvelope);
+  rpc Invoke(InvokeRequest) returns (InvokeResponse);
+  rpc GetSessionSnapshots(GetSessionSnapshotsRequest) returns (GetSessionSnapshotsResponse);
+  rpc BeginPhoneAuthorization(BeginPhoneAuthorizationRequest) returns (BeginPhoneAuthorizationResponse);
+  rpc CompletePhoneAuthorization(CompletePhoneAuthorizationRequest) returns (CompletePhoneAuthorizationResponse);
+  rpc CompletePasswordAuthorization(CompletePasswordAuthorizationRequest) returns (CompletePasswordAuthorizationResponse);
+}
+
+message SubscribeRequest {
+  optional int32 interface = 1;
+  optional bool close_other = 2;
+}
+
+message UpdateEnvelope {
+  int64 session_peer_id = 1;
+  string session_kind = 2;
+  bytes body = 3;
+  google.protobuf.Timestamp received_at = 4;
+}
+
+message InvokeRequest {
+  int64 session_peer_id = 1;
+  bytes body = 2;
+  optional int32 dc_id = 3;
+}
+
+message InvokeResponse {
+  bytes body = 1;
+  optional string error = 2;
+  optional TelegramRpcError rpc_error = 3;
+}
+
+message TelegramRpcError {
+  int32 code = 1;
+  string name = 2;
+  optional uint32 value = 3;
+  optional uint32 caused_by = 4;
+}
+
+message GetSessionSnapshotsRequest {
+  repeated int64 session_peer_ids = 1;
+}
+
+message GetSessionSnapshotsResponse {
+  repeated SessionSnapshot sessions = 1;
+}
+
+message SessionSnapshot {
+  int64 session_peer_id = 1;
+  string state = 2;
+  bool alive = 3;
+  bool fatal = 4;
+  bool proxy_broken = 5;
+  uint64 uptime_ms = 6;
+  double updates_per_second = 7;
+  double invokes_per_second = 8;
+  uint64 invokes_in_flight = 9;
+  uint64 memory_bytes = 10;
+  uint64 updates_total = 11;
+  uint64 invokes_total = 12;
+  optional string last_error = 13;
+  google.protobuf.Timestamp updated_at = 14;
+  uint64 media_upload_bytes = 15;
+  uint64 media_download_bytes = 16;
+  uint64 media_requests_total = 17;
+  uint64 media_requests_in_flight = 18;
+}
+
+message BeginPhoneAuthorizationRequest {
+  string phone_number = 1;
+}
+
+message BeginPhoneAuthorizationResponse {
+  string authorization_id = 1;
+  google.protobuf.Timestamp expires_at = 2;
+}
+
+message CompletePhoneAuthorizationRequest {
+  string authorization_id = 1;
+  string code = 2;
+}
+
+enum PhoneAuthorizationState {
+  PHONE_AUTHORIZATION_STATE_UNSPECIFIED = 0;
+  PHONE_AUTHORIZATION_STATE_PASSWORD_REQUIRED = 1;
+  PHONE_AUTHORIZATION_STATE_AUTHORIZED = 2;
+}
+
+message CompletePhoneAuthorizationResponse {
+  PhoneAuthorizationState state = 1;
+  optional string password_hint = 2;
+  optional SessionRegistration session = 3;
+}
+
+message CompletePasswordAuthorizationRequest {
+  string authorization_id = 1;
+  string password = 2;
+}
+
+message CompletePasswordAuthorizationResponse {
+  SessionRegistration session = 1;
+}
+
+message SessionRegistration {
+  int64 session_peer_id = 1;
+  string state = 2;
+}
