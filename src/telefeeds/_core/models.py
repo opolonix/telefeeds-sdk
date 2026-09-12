@@ -33,6 +33,7 @@ class SessionSnapshot:
     media_download_bytes: int
     media_requests_total: int
     media_requests_in_flight: int
+    tl_layer: int | None
 
 
 @dataclass(frozen=True, slots=True)

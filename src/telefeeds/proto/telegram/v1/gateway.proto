@@ -18,6 +18,7 @@ service TelegramGateway {
 message SubscribeRequest {
   optional int32 interface = 1;
   optional bool close_other = 2;
+  optional int32 tl_layer = 3;
 }
 
 message UpdateEnvelope {
@@ -31,6 +32,7 @@ message InvokeRequest {
   int64 session_peer_id = 1;
   bytes body = 2;
   optional int32 dc_id = 3;
+  optional int32 tl_layer = 4;
 }
 
 message InvokeResponse {
@@ -73,6 +75,7 @@ message SessionSnapshot {
   uint64 media_download_bytes = 16;
   uint64 media_requests_total = 17;
   uint64 media_requests_in_flight = 18;
+  optional int32 tl_layer = 19;
 }
 
 message BeginPhoneAuthorizationRequest {

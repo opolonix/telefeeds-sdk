@@ -82,6 +82,7 @@ class GrpcSession:
                     self.session_peer_id,
                     query.write(),
                     dc_id=active_dc_id,
+                    tl_layer=self.owner.telefeeds.tl_layer,
                     timeout=timeout,
                 )
                 response = TLObject.read(BytesIO(body))

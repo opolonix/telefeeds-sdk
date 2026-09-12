@@ -106,12 +106,15 @@ class TelefeedsClient:
         *,
         interface: int | None = None,
         close_other: bool | None = None,
+        tl_layer: int | None = None,
     ) -> AsyncIterator[UpdateEnvelope]:
         request = gateway.SubscribeRequest()
         if interface is not None:
             request.interface = interface
         if close_other is not None:
             request.close_other = close_other
+        if tl_layer is not None:
+            request.tl_layer = tl_layer
         call = self.require_stub().Subscribe(request, metadata=self.metadata)
         async for event in call:
             received_at = (
@@ -132,11 +135,14 @@ class TelefeedsClient:
         body: bytes,
         *,
         dc_id: int | None = None,
+        tl_layer: int | None = None,
         timeout: float | None = None,
     ) -> bytes:
         request = gateway.InvokeRequest(session_peer_id=session_peer_id, body=body)
         if dc_id is not None:
             request.dc_id = dc_id
+        if tl_layer is not None:
+            request.tl_layer = tl_layer
         response = await self.require_stub().Invoke(
             request,
             metadata=self.metadata,
@@ -191,6 +197,7 @@ class TelefeedsClient:
                 media_download_bytes=session.media_download_bytes,
                 media_requests_total=session.media_requests_total,
                 media_requests_in_flight=session.media_requests_in_flight,
+                tl_layer=session.tl_layer if session.HasField("tl_layer") else None,
             )
             for session in response.sessions
         ]

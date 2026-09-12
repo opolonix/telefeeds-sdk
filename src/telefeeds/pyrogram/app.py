@@ -65,6 +65,7 @@ class Telefeeds(HandlerRegistrar):
         supplied_kwargs.setdefault("workers", 1)
         supplied_kwargs.setdefault("max_concurrent_transmissions", 4)
         self.default_client = default_client
+        self.tl_layer = int(pyrogram.raw.all.layer)
         self.client_kwargs = supplied_kwargs
         self.interface = interface
         self.close_other = close_other
@@ -230,6 +231,7 @@ class Telefeeds(HandlerRegistrar):
                 async for envelope in self.gateway.subscribe(
                     interface=self.interface,
                     close_other=self.close_other,
+                    tl_layer=self.tl_layer,
                 ):
                     reconnect_delay = 0.5
                     client = await self.get_client(

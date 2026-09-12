@@ -16,6 +16,7 @@ from telefeeds.pyrogram import Router, Telefeeds
 class FakeGateway:
     def __init__(self) -> None:
         self.requests: list[tuple[int, object, int | None]] = []
+        self.tl_layers: list[int | None] = []
         self.rpc_error: TelegramRPCError | None = None
 
     async def open(self, *, timeout: float | None = None):
@@ -30,10 +31,12 @@ class FakeGateway:
         body: bytes,
         *,
         dc_id: int | None = None,
+        tl_layer: int | None = None,
         timeout: float | None = None,
     ) -> bytes:
         request = TLObject.read(BytesIO(body))
         self.requests.append((session_peer_id, request, dc_id))
+        self.tl_layers.append(tl_layer)
         if self.rpc_error is not None:
             raise self.rpc_error
         if isinstance(request, raw.functions.upload.GetFile):
@@ -124,6 +127,7 @@ async def test_download_forces_cdn_off_and_routes_to_file_dc() -> None:
     assert session_peer_id == 100
     assert dc_id == 4
     assert request.cdn_supported is False
+    assert gateway.tl_layers[-1] == raw.all.layer
     await app.stop_async()
 
 
@@ -143,5 +147,6 @@ async def test_upload_uses_file_parts_through_grpc_session() -> None:
     assert dc_id is None
     assert isinstance(request, raw.functions.upload.SaveFilePart)
     assert request.bytes == b"upload payload"
+    assert gateway.tl_layers[-1] == raw.all.layer
     assert client.media_stats.uploaded_bytes == len(request.bytes)
     await app.stop_async()
