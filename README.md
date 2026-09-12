@@ -40,7 +40,15 @@ async with Telefeeds(token="tfi_...") as app:
 
 One `Telefeeds` object owns one TLS gRPC channel and any number of lightweight session clients. A separate dynamic subclass and in-memory peer storage are used for each `(session_kind, session_peer_id)`. Methods such as `send_message()`, `get_messages()` and raw `invoke()` therefore resolve peers in the correct account. Direct connection, logout and session export methods raise `NotImplementedError`, because Telefeeds owns the MTProto connection and credentials.
 
-The adapter reads `pyrogram.raw.all.layer` from the implementation installed by the application and sends it with the update subscription and every invocation. ClientHub asks Core and Bridge to negotiate that layer before updates are delivered, and Core persists it for reconnects. Applications do not need to call `InvokeWithLayer` or `InitConnection` themselves. The current server contract supports TL layer 228, used by Kurigram 2.2.25; another layer is rejected with `FAILED_PRECONDITION` so updates cannot be decoded with the wrong schema.
+The adapter reads `pyrogram.raw.all.layer` from the implementation installed by the application and sends it with the update subscription and every invocation. ClientHub converts layers 227, 228 and 229 at its public boundary; Core, Bridge and the internal event stream always use layer 229. Applications do not need to call `InvokeWithLayer` or `InitConnection` themselves.
+
+The detected value can be overridden when testing a compatible raw schema:
+
+```python
+app = Telefeeds(token="tfi_...", tl_layer=228)
+```
+
+The override must match the raw objects serialized and decoded by the installed Pyrogram-compatible package.
 
 To use a custom client class from the installed Pyrogram-compatible package:
 

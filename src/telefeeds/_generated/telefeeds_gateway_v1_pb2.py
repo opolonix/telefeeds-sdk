@@ -25,45 +25,45 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1atelefeeds_gateway_v1.proto\x12\x15telefeeds.telegram.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x86\x01\n\x10SubscribeRequest\x12\x16\n\tinterface\x18\x01 \x01(\x05H\x00\x88\x01\x01\x12\x18\n\x0b\x63lose_other\x18\x02 \x01(\x08H\x01\x88\x01\x01\x12\x15\n\x08tl_layer\x18\x03 \x01(\x05H\x02\x88\x01\x01\x42\x0c\n\n_interfaceB\x0e\n\x0c_close_otherB\x0b\n\t_tl_layer\"~\n\x0eUpdateEnvelope\x12\x17\n\x0fsession_peer_id\x18\x01 \x01(\x03\x12\x14\n\x0csession_kind\x18\x02 \x01(\t\x12\x0c\n\x04\x62ody\x18\x03 \x01(\x0c\x12/\n\x0breceived_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"x\n\rInvokeRequest\x12\x17\n\x0fsession_peer_id\x18\x01 \x01(\x03\x12\x0c\n\x04\x62ody\x18\x02 \x01(\x0c\x12\x12\n\x05\x64\x63_id\x18\x03 \x01(\x05H\x00\x88\x01\x01\x12\x15\n\x08tl_layer\x18\x04 \x01(\x05H\x01\x88\x01\x01\x42\x08\n\x06_dc_idB\x0b\n\t_tl_layer\"\x8b\x01\n\x0eInvokeResponse\x12\x0c\n\x04\x62ody\x18\x01 \x01(\x0c\x12\x12\n\x05\x65rror\x18\x02 \x01(\tH\x00\x88\x01\x01\x12?\n\trpc_error\x18\x03 \x01(\x0b\x32\'.telefeeds.telegram.v1.TelegramRpcErrorH\x01\x88\x01\x01\x42\x08\n\x06_errorB\x0c\n\n_rpc_error\"r\n\x10TelegramRpcError\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\x05value\x18\x03 \x01(\rH\x00\x88\x01\x01\x12\x16\n\tcaused_by\x18\x04 \x01(\rH\x01\x88\x01\x01\x42\x08\n\x06_valueB\x0c\n\n_caused_by\"6\n\x1aGetSessionSnapshotsRequest\x12\x18\n\x10session_peer_ids\x18\x01 \x03(\x03\"W\n\x1bGetSessionSnapshotsResponse\x12\x38\n\x08sessions\x18\x01 \x03(\x0b\x32&.telefeeds.telegram.v1.SessionSnapshot\"\x8d\x04\n\x0fSessionSnapshot\x12\x17\n\x0fsession_peer_id\x18\x01 \x01(\x03\x12\r\n\x05state\x18\x02 \x01(\t\x12\r\n\x05\x61live\x18\x03 \x01(\x08\x12\r\n\x05\x66\x61tal\x18\x04 \x01(\x08\x12\x14\n\x0cproxy_broken\x18\x05 \x01(\x08\x12\x11\n\tuptime_ms\x18\x06 \x01(\x04\x12\x1a\n\x12updates_per_second\x18\x07 \x01(\x01\x12\x1a\n\x12invokes_per_second\x18\x08 \x01(\x01\x12\x19\n\x11invokes_in_flight\x18\t \x01(\x04\x12\x14\n\x0cmemory_bytes\x18\n \x01(\x04\x12\x15\n\rupdates_total\x18\x0b \x01(\x04\x12\x15\n\rinvokes_total\x18\x0c \x01(\x04\x12\x17\n\nlast_error\x18\r \x01(\tH\x00\x88\x01\x01\x12.\n\nupdated_at\x18\x0e \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1a\n\x12media_upload_bytes\x18\x0f \x01(\x04\x12\x1c\n\x14media_download_bytes\x18\x10 \x01(\x04\x12\x1c\n\x14media_requests_total\x18\x11 \x01(\x04\x12 \n\x18media_requests_in_flight\x18\x12 \x01(\x04\x12\x15\n\x08tl_layer\x18\x13 \x01(\x05H\x01\x88\x01\x01\x42\r\n\x0b_last_errorB\x0b\n\t_tl_layer\"6\n\x1e\x42\x65ginPhoneAuthorizationRequest\x12\x14\n\x0cphone_number\x18\x01 \x01(\t\"k\n\x1f\x42\x65ginPhoneAuthorizationResponse\x12\x18\n\x10\x61uthorization_id\x18\x01 \x01(\t\x12.\n\nexpires_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"K\n!CompletePhoneAuthorizationRequest\x12\x18\n\x10\x61uthorization_id\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\"\xdf\x01\n\"CompletePhoneAuthorizationResponse\x12=\n\x05state\x18\x01 \x01(\x0e\x32..telefeeds.telegram.v1.PhoneAuthorizationState\x12\x1a\n\rpassword_hint\x18\x02 \x01(\tH\x00\x88\x01\x01\x12@\n\x07session\x18\x03 \x01(\x0b\x32*.telefeeds.telegram.v1.SessionRegistrationH\x01\x88\x01\x01\x42\x10\n\x0e_password_hintB\n\n\x08_session\"R\n$CompletePasswordAuthorizationRequest\x12\x18\n\x10\x61uthorization_id\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"d\n%CompletePasswordAuthorizationResponse\x12;\n\x07session\x18\x01 \x01(\x0b\x32*.telefeeds.telegram.v1.SessionRegistration\"=\n\x13SessionRegistration\x12\x17\n\x0fsession_peer_id\x18\x01 \x01(\x03\x12\r\n\x05state\x18\x02 \x01(\t*\x9f\x01\n\x17PhoneAuthorizationState\x12)\n%PHONE_AUTHORIZATION_STATE_UNSPECIFIED\x10\x00\x12/\n+PHONE_AUTHORIZATION_STATE_PASSWORD_REQUIRED\x10\x01\x12(\n$PHONE_AUTHORIZATION_STATE_AUTHORIZED\x10\x02\x32\x81\x06\n\x0fTelegramGateway\x12]\n\tSubscribe\x12\'.telefeeds.telegram.v1.SubscribeRequest\x1a%.telefeeds.telegram.v1.UpdateEnvelope0\x01\x12U\n\x06Invoke\x12$.telefeeds.telegram.v1.InvokeRequest\x1a%.telefeeds.telegram.v1.InvokeResponse\x12|\n\x13GetSessionSnapshots\x12\x31.telefeeds.telegram.v1.GetSessionSnapshotsRequest\x1a\x32.telefeeds.telegram.v1.GetSessionSnapshotsResponse\x12\x88\x01\n\x17\x42\x65ginPhoneAuthorization\x12\x35.telefeeds.telegram.v1.BeginPhoneAuthorizationRequest\x1a\x36.telefeeds.telegram.v1.BeginPhoneAuthorizationResponse\x12\x91\x01\n\x1a\x43ompletePhoneAuthorization\x12\x38.telefeeds.telegram.v1.CompletePhoneAuthorizationRequest\x1a\x39.telefeeds.telegram.v1.CompletePhoneAuthorizationResponse\x12\x9a\x01\n\x1d\x43ompletePasswordAuthorization\x12;.telefeeds.telegram.v1.CompletePasswordAuthorizationRequest\x1a<.telefeeds.telegram.v1.CompletePasswordAuthorizationResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1atelefeeds_gateway_v1.proto\x12\x15telefeeds.telegram.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"t\n\x10SubscribeRequest\x12\x16\n\tinterface\x18\x01 \x01(\x05H\x00\x88\x01\x01\x12\x18\n\x0b\x63lose_other\x18\x02 \x01(\x08H\x01\x88\x01\x01\x12\x10\n\x08tl_layer\x18\x03 \x01(\x05\x42\x0c\n\n_interfaceB\x0e\n\x0c_close_other\"\x90\x01\n\x0eUpdateEnvelope\x12\x17\n\x0fsession_peer_id\x18\x01 \x01(\x03\x12\x14\n\x0csession_kind\x18\x02 \x01(\t\x12\x0c\n\x04\x62ody\x18\x03 \x01(\x0c\x12/\n\x0breceived_at\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x10\n\x08tl_layer\x18\x05 \x01(\x05\"f\n\rInvokeRequest\x12\x17\n\x0fsession_peer_id\x18\x01 \x01(\x03\x12\x0c\n\x04\x62ody\x18\x02 \x01(\x0c\x12\x12\n\x05\x64\x63_id\x18\x03 \x01(\x05H\x00\x88\x01\x01\x12\x10\n\x08tl_layer\x18\x04 \x01(\x05\x42\x08\n\x06_dc_id\"\x8b\x01\n\x0eInvokeResponse\x12\x0c\n\x04\x62ody\x18\x01 \x01(\x0c\x12\x12\n\x05\x65rror\x18\x02 \x01(\tH\x00\x88\x01\x01\x12?\n\trpc_error\x18\x03 \x01(\x0b\x32\'.telefeeds.telegram.v1.TelegramRpcErrorH\x01\x88\x01\x01\x42\x08\n\x06_errorB\x0c\n\n_rpc_error\"r\n\x10TelegramRpcError\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\x05value\x18\x03 \x01(\rH\x00\x88\x01\x01\x12\x16\n\tcaused_by\x18\x04 \x01(\rH\x01\x88\x01\x01\x42\x08\n\x06_valueB\x0c\n\n_caused_by\"6\n\x1aGetSessionSnapshotsRequest\x12\x18\n\x10session_peer_ids\x18\x01 \x03(\x03\"W\n\x1bGetSessionSnapshotsResponse\x12\x38\n\x08sessions\x18\x01 \x03(\x0b\x32&.telefeeds.telegram.v1.SessionSnapshot\"\x8d\x04\n\x0fSessionSnapshot\x12\x17\n\x0fsession_peer_id\x18\x01 \x01(\x03\x12\r\n\x05state\x18\x02 \x01(\t\x12\r\n\x05\x61live\x18\x03 \x01(\x08\x12\r\n\x05\x66\x61tal\x18\x04 \x01(\x08\x12\x14\n\x0cproxy_broken\x18\x05 \x01(\x08\x12\x11\n\tuptime_ms\x18\x06 \x01(\x04\x12\x1a\n\x12updates_per_second\x18\x07 \x01(\x01\x12\x1a\n\x12invokes_per_second\x18\x08 \x01(\x01\x12\x19\n\x11invokes_in_flight\x18\t \x01(\x04\x12\x14\n\x0cmemory_bytes\x18\n \x01(\x04\x12\x15\n\rupdates_total\x18\x0b \x01(\x04\x12\x15\n\rinvokes_total\x18\x0c \x01(\x04\x12\x17\n\nlast_error\x18\r \x01(\tH\x00\x88\x01\x01\x12.\n\nupdated_at\x18\x0e \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1a\n\x12media_upload_bytes\x18\x0f \x01(\x04\x12\x1c\n\x14media_download_bytes\x18\x10 \x01(\x04\x12\x1c\n\x14media_requests_total\x18\x11 \x01(\x04\x12 \n\x18media_requests_in_flight\x18\x12 \x01(\x04\x12\x15\n\x08tl_layer\x18\x13 \x01(\x05H\x01\x88\x01\x01\x42\r\n\x0b_last_errorB\x0b\n\t_tl_layer\"6\n\x1e\x42\x65ginPhoneAuthorizationRequest\x12\x14\n\x0cphone_number\x18\x01 \x01(\t\"k\n\x1f\x42\x65ginPhoneAuthorizationResponse\x12\x18\n\x10\x61uthorization_id\x18\x01 \x01(\t\x12.\n\nexpires_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"K\n!CompletePhoneAuthorizationRequest\x12\x18\n\x10\x61uthorization_id\x18\x01 \x01(\t\x12\x0c\n\x04\x63ode\x18\x02 \x01(\t\"\xdf\x01\n\"CompletePhoneAuthorizationResponse\x12=\n\x05state\x18\x01 \x01(\x0e\x32..telefeeds.telegram.v1.PhoneAuthorizationState\x12\x1a\n\rpassword_hint\x18\x02 \x01(\tH\x00\x88\x01\x01\x12@\n\x07session\x18\x03 \x01(\x0b\x32*.telefeeds.telegram.v1.SessionRegistrationH\x01\x88\x01\x01\x42\x10\n\x0e_password_hintB\n\n\x08_session\"R\n$CompletePasswordAuthorizationRequest\x12\x18\n\x10\x61uthorization_id\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"d\n%CompletePasswordAuthorizationResponse\x12;\n\x07session\x18\x01 \x01(\x0b\x32*.telefeeds.telegram.v1.SessionRegistration\"=\n\x13SessionRegistration\x12\x17\n\x0fsession_peer_id\x18\x01 \x01(\x03\x12\r\n\x05state\x18\x02 \x01(\t*\x9f\x01\n\x17PhoneAuthorizationState\x12)\n%PHONE_AUTHORIZATION_STATE_UNSPECIFIED\x10\x00\x12/\n+PHONE_AUTHORIZATION_STATE_PASSWORD_REQUIRED\x10\x01\x12(\n$PHONE_AUTHORIZATION_STATE_AUTHORIZED\x10\x02\x32\x81\x06\n\x0fTelegramGateway\x12]\n\tSubscribe\x12\'.telefeeds.telegram.v1.SubscribeRequest\x1a%.telefeeds.telegram.v1.UpdateEnvelope0\x01\x12U\n\x06Invoke\x12$.telefeeds.telegram.v1.InvokeRequest\x1a%.telefeeds.telegram.v1.InvokeResponse\x12|\n\x13GetSessionSnapshots\x12\x31.telefeeds.telegram.v1.GetSessionSnapshotsRequest\x1a\x32.telefeeds.telegram.v1.GetSessionSnapshotsResponse\x12\x88\x01\n\x17\x42\x65ginPhoneAuthorization\x12\x35.telefeeds.telegram.v1.BeginPhoneAuthorizationRequest\x1a\x36.telefeeds.telegram.v1.BeginPhoneAuthorizationResponse\x12\x91\x01\n\x1a\x43ompletePhoneAuthorization\x12\x38.telefeeds.telegram.v1.CompletePhoneAuthorizationRequest\x1a\x39.telefeeds.telegram.v1.CompletePhoneAuthorizationResponse\x12\x9a\x01\n\x1d\x43ompletePasswordAuthorization\x12;.telefeeds.telegram.v1.CompletePasswordAuthorizationRequest\x1a<.telefeeds.telegram.v1.CompletePasswordAuthorizationResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'telefeeds_gateway_v1_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_PHONEAUTHORIZATIONSTATE']._serialized_start=2122
-  _globals['_PHONEAUTHORIZATIONSTATE']._serialized_end=2281
-  _globals['_SUBSCRIBEREQUEST']._serialized_start=87
-  _globals['_SUBSCRIBEREQUEST']._serialized_end=221
-  _globals['_UPDATEENVELOPE']._serialized_start=223
+  _globals['_PHONEAUTHORIZATIONSTATE']._serialized_start=2104
+  _globals['_PHONEAUTHORIZATIONSTATE']._serialized_end=2263
+  _globals['_SUBSCRIBEREQUEST']._serialized_start=86
+  _globals['_SUBSCRIBEREQUEST']._serialized_end=202
+  _globals['_UPDATEENVELOPE']._serialized_start=205
   _globals['_UPDATEENVELOPE']._serialized_end=349
   _globals['_INVOKEREQUEST']._serialized_start=351
-  _globals['_INVOKEREQUEST']._serialized_end=471
-  _globals['_INVOKERESPONSE']._serialized_start=474
-  _globals['_INVOKERESPONSE']._serialized_end=613
-  _globals['_TELEGRAMRPCERROR']._serialized_start=615
-  _globals['_TELEGRAMRPCERROR']._serialized_end=729
-  _globals['_GETSESSIONSNAPSHOTSREQUEST']._serialized_start=731
-  _globals['_GETSESSIONSNAPSHOTSREQUEST']._serialized_end=785
-  _globals['_GETSESSIONSNAPSHOTSRESPONSE']._serialized_start=787
-  _globals['_GETSESSIONSNAPSHOTSRESPONSE']._serialized_end=874
-  _globals['_SESSIONSNAPSHOT']._serialized_start=877
-  _globals['_SESSIONSNAPSHOT']._serialized_end=1402
-  _globals['_BEGINPHONEAUTHORIZATIONREQUEST']._serialized_start=1404
-  _globals['_BEGINPHONEAUTHORIZATIONREQUEST']._serialized_end=1458
-  _globals['_BEGINPHONEAUTHORIZATIONRESPONSE']._serialized_start=1460
-  _globals['_BEGINPHONEAUTHORIZATIONRESPONSE']._serialized_end=1567
-  _globals['_COMPLETEPHONEAUTHORIZATIONREQUEST']._serialized_start=1569
-  _globals['_COMPLETEPHONEAUTHORIZATIONREQUEST']._serialized_end=1644
-  _globals['_COMPLETEPHONEAUTHORIZATIONRESPONSE']._serialized_start=1647
-  _globals['_COMPLETEPHONEAUTHORIZATIONRESPONSE']._serialized_end=1870
-  _globals['_COMPLETEPASSWORDAUTHORIZATIONREQUEST']._serialized_start=1872
-  _globals['_COMPLETEPASSWORDAUTHORIZATIONREQUEST']._serialized_end=1954
-  _globals['_COMPLETEPASSWORDAUTHORIZATIONRESPONSE']._serialized_start=1956
-  _globals['_COMPLETEPASSWORDAUTHORIZATIONRESPONSE']._serialized_end=2056
-  _globals['_SESSIONREGISTRATION']._serialized_start=2058
-  _globals['_SESSIONREGISTRATION']._serialized_end=2119
-  _globals['_TELEGRAMGATEWAY']._serialized_start=2284
-  _globals['_TELEGRAMGATEWAY']._serialized_end=3053
+  _globals['_INVOKEREQUEST']._serialized_end=453
+  _globals['_INVOKERESPONSE']._serialized_start=456
+  _globals['_INVOKERESPONSE']._serialized_end=595
+  _globals['_TELEGRAMRPCERROR']._serialized_start=597
+  _globals['_TELEGRAMRPCERROR']._serialized_end=711
+  _globals['_GETSESSIONSNAPSHOTSREQUEST']._serialized_start=713
+  _globals['_GETSESSIONSNAPSHOTSREQUEST']._serialized_end=767
+  _globals['_GETSESSIONSNAPSHOTSRESPONSE']._serialized_start=769
+  _globals['_GETSESSIONSNAPSHOTSRESPONSE']._serialized_end=856
+  _globals['_SESSIONSNAPSHOT']._serialized_start=859
+  _globals['_SESSIONSNAPSHOT']._serialized_end=1384
+  _globals['_BEGINPHONEAUTHORIZATIONREQUEST']._serialized_start=1386
+  _globals['_BEGINPHONEAUTHORIZATIONREQUEST']._serialized_end=1440
+  _globals['_BEGINPHONEAUTHORIZATIONRESPONSE']._serialized_start=1442
+  _globals['_BEGINPHONEAUTHORIZATIONRESPONSE']._serialized_end=1549
+  _globals['_COMPLETEPHONEAUTHORIZATIONREQUEST']._serialized_start=1551
+  _globals['_COMPLETEPHONEAUTHORIZATIONREQUEST']._serialized_end=1626
+  _globals['_COMPLETEPHONEAUTHORIZATIONRESPONSE']._serialized_start=1629
+  _globals['_COMPLETEPHONEAUTHORIZATIONRESPONSE']._serialized_end=1852
+  _globals['_COMPLETEPASSWORDAUTHORIZATIONREQUEST']._serialized_start=1854
+  _globals['_COMPLETEPASSWORDAUTHORIZATIONREQUEST']._serialized_end=1936
+  _globals['_COMPLETEPASSWORDAUTHORIZATIONRESPONSE']._serialized_start=1938
+  _globals['_COMPLETEPASSWORDAUTHORIZATIONRESPONSE']._serialized_end=2038
+  _globals['_SESSIONREGISTRATION']._serialized_start=2040
+  _globals['_SESSIONREGISTRATION']._serialized_end=2101
+  _globals['_TELEGRAMGATEWAY']._serialized_start=2266
+  _globals['_TELEGRAMGATEWAY']._serialized_end=3035
 # @@protoc_insertion_point(module_scope)

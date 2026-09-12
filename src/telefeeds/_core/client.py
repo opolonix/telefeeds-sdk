@@ -106,15 +106,13 @@ class TelefeedsClient:
         *,
         interface: int | None = None,
         close_other: bool | None = None,
-        tl_layer: int | None = None,
+        tl_layer: int,
     ) -> AsyncIterator[UpdateEnvelope]:
-        request = gateway.SubscribeRequest()
+        request = gateway.SubscribeRequest(tl_layer=tl_layer)
         if interface is not None:
             request.interface = interface
         if close_other is not None:
             request.close_other = close_other
-        if tl_layer is not None:
-            request.tl_layer = tl_layer
         call = self.require_stub().Subscribe(request, metadata=self.metadata)
         async for event in call:
             received_at = (
@@ -127,6 +125,7 @@ class TelefeedsClient:
                 session_kind=event.session_kind,
                 body=event.body,
                 received_at=received_at,
+                tl_layer=event.tl_layer,
             )
 
     async def invoke_raw(
@@ -135,14 +134,16 @@ class TelefeedsClient:
         body: bytes,
         *,
         dc_id: int | None = None,
-        tl_layer: int | None = None,
+        tl_layer: int,
         timeout: float | None = None,
     ) -> bytes:
-        request = gateway.InvokeRequest(session_peer_id=session_peer_id, body=body)
+        request = gateway.InvokeRequest(
+            session_peer_id=session_peer_id,
+            body=body,
+            tl_layer=tl_layer,
+        )
         if dc_id is not None:
             request.dc_id = dc_id
-        if tl_layer is not None:
-            request.tl_layer = tl_layer
         response = await self.require_stub().Invoke(
             request,
             metadata=self.metadata,

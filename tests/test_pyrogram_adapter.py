@@ -16,7 +16,7 @@ from telefeeds.pyrogram import Router, Telefeeds
 class FakeGateway:
     def __init__(self) -> None:
         self.requests: list[tuple[int, object, int | None]] = []
-        self.tl_layers: list[int | None] = []
+        self.tl_layers: list[int] = []
         self.rpc_error: TelegramRPCError | None = None
 
     async def open(self, *, timeout: float | None = None):
@@ -31,7 +31,7 @@ class FakeGateway:
         body: bytes,
         *,
         dc_id: int | None = None,
-        tl_layer: int | None = None,
+        tl_layer: int,
         timeout: float | None = None,
     ) -> bytes:
         request = TLObject.read(BytesIO(body))
@@ -65,6 +65,13 @@ async def test_clients_are_isolated_and_use_selected_client() -> None:
     assert second.session.session_peer_id == 200
 
     await app.stop_async()
+
+
+def test_tl_layer_uses_installed_schema_and_allows_override() -> None:
+    assert Telefeeds("token", gateway=FakeGateway()).tl_layer == raw.all.layer
+    assert Telefeeds("token", tl_layer=227, gateway=FakeGateway()).tl_layer == 227
+    with pytest.raises(ValueError, match="between 227 and 229"):
+        Telefeeds("token", tl_layer=226, gateway=FakeGateway())
 
 
 @pytest.mark.asyncio

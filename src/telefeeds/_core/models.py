@@ -11,6 +11,7 @@ class UpdateEnvelope:
     session_kind: str
     body: bytes
     received_at: datetime | None
+    tl_layer: int
 
 
 @dataclass(frozen=True, slots=True)

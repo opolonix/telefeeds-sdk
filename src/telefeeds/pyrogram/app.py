@@ -30,6 +30,7 @@ class Telefeeds(HandlerRegistrar):
         endpoint: str = "telegram.telefeeds.ru:443",
         interface: int | None = None,
         close_other: bool | None = None,
+        tl_layer: int | None = None,
         default_client: type[pyrogram.Client] = pyrogram.Client,
         client_kwargs: dict[str, Any] | None = None,
         secure: bool = True,
@@ -65,7 +66,9 @@ class Telefeeds(HandlerRegistrar):
         supplied_kwargs.setdefault("workers", 1)
         supplied_kwargs.setdefault("max_concurrent_transmissions", 4)
         self.default_client = default_client
-        self.tl_layer = int(pyrogram.raw.all.layer)
+        self.tl_layer = int(pyrogram.raw.all.layer) if tl_layer is None else tl_layer
+        if not 227 <= self.tl_layer <= 229:
+            raise ValueError("tl_layer must be between 227 and 229")
         self.client_kwargs = supplied_kwargs
         self.interface = interface
         self.close_other = close_other
@@ -233,6 +236,11 @@ class Telefeeds(HandlerRegistrar):
                     close_other=self.close_other,
                     tl_layer=self.tl_layer,
                 ):
+                    if envelope.tl_layer != self.tl_layer:
+                        raise RuntimeError(
+                            "ClientHub returned TL layer "
+                            f"{envelope.tl_layer}, expected {self.tl_layer}"
+                        )
                     reconnect_delay = 0.5
                     client = await self.get_client(
                         envelope.session_peer_id,

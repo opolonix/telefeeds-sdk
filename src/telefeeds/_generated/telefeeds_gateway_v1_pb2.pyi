@@ -30,16 +30,18 @@ class SubscribeRequest(_message.Message):
     def __init__(self, interface: _Optional[int] = ..., close_other: _Optional[bool] = ..., tl_layer: _Optional[int] = ...) -> None: ...
 
 class UpdateEnvelope(_message.Message):
-    __slots__ = ("session_peer_id", "session_kind", "body", "received_at")
+    __slots__ = ("session_peer_id", "session_kind", "body", "received_at", "tl_layer")
     SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
     SESSION_KIND_FIELD_NUMBER: _ClassVar[int]
     BODY_FIELD_NUMBER: _ClassVar[int]
     RECEIVED_AT_FIELD_NUMBER: _ClassVar[int]
+    TL_LAYER_FIELD_NUMBER: _ClassVar[int]
     session_peer_id: int
     session_kind: str
     body: bytes
     received_at: _timestamp_pb2.Timestamp
-    def __init__(self, session_peer_id: _Optional[int] = ..., session_kind: _Optional[str] = ..., body: _Optional[bytes] = ..., received_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    tl_layer: int
+    def __init__(self, session_peer_id: _Optional[int] = ..., session_kind: _Optional[str] = ..., body: _Optional[bytes] = ..., received_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., tl_layer: _Optional[int] = ...) -> None: ...
 
 class InvokeRequest(_message.Message):
     __slots__ = ("session_peer_id", "body", "dc_id", "tl_layer")
