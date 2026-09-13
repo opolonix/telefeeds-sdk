@@ -136,6 +136,60 @@ class TelegramRpcError(_message.Message):
     caused_by: int
     def __init__(self, code: _Optional[int] = ..., name: _Optional[str] = ..., value: _Optional[int] = ..., caused_by: _Optional[int] = ...) -> None: ...
 
+class GetIntegrationSnapshotRequest(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
+
+class IntegrationSnapshot(_message.Message):
+    __slots__ = ("integration_id", "client_id", "name", "enabled", "allow_user_sessions", "telegram_credentials_configured", "granted_scopes", "default_interface", "default_close_other", "proxy_pool_size", "user_session_day_price_cents", "created_at", "updated_at", "metrics")
+    INTEGRATION_ID_FIELD_NUMBER: _ClassVar[int]
+    CLIENT_ID_FIELD_NUMBER: _ClassVar[int]
+    NAME_FIELD_NUMBER: _ClassVar[int]
+    ENABLED_FIELD_NUMBER: _ClassVar[int]
+    ALLOW_USER_SESSIONS_FIELD_NUMBER: _ClassVar[int]
+    TELEGRAM_CREDENTIALS_CONFIGURED_FIELD_NUMBER: _ClassVar[int]
+    GRANTED_SCOPES_FIELD_NUMBER: _ClassVar[int]
+    DEFAULT_INTERFACE_FIELD_NUMBER: _ClassVar[int]
+    DEFAULT_CLOSE_OTHER_FIELD_NUMBER: _ClassVar[int]
+    PROXY_POOL_SIZE_FIELD_NUMBER: _ClassVar[int]
+    USER_SESSION_DAY_PRICE_CENTS_FIELD_NUMBER: _ClassVar[int]
+    CREATED_AT_FIELD_NUMBER: _ClassVar[int]
+    UPDATED_AT_FIELD_NUMBER: _ClassVar[int]
+    METRICS_FIELD_NUMBER: _ClassVar[int]
+    integration_id: str
+    client_id: int
+    name: str
+    enabled: bool
+    allow_user_sessions: bool
+    telegram_credentials_configured: bool
+    granted_scopes: _containers.RepeatedScalarFieldContainer[str]
+    default_interface: int
+    default_close_other: bool
+    proxy_pool_size: int
+    user_session_day_price_cents: float
+    created_at: _timestamp_pb2.Timestamp
+    updated_at: _timestamp_pb2.Timestamp
+    metrics: IntegrationMetricsSnapshot
+    def __init__(self, integration_id: _Optional[str] = ..., client_id: _Optional[int] = ..., name: _Optional[str] = ..., enabled: _Optional[bool] = ..., allow_user_sessions: _Optional[bool] = ..., telegram_credentials_configured: _Optional[bool] = ..., granted_scopes: _Optional[_Iterable[str]] = ..., default_interface: _Optional[int] = ..., default_close_other: _Optional[bool] = ..., proxy_pool_size: _Optional[int] = ..., user_session_day_price_cents: _Optional[float] = ..., created_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., updated_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., metrics: _Optional[_Union[IntegrationMetricsSnapshot, _Mapping]] = ...) -> None: ...
+
+class IntegrationMetricsSnapshot(_message.Message):
+    __slots__ = ("user_sessions_total", "user_sessions_updates_enabled", "usage_days_total", "bot_access_total", "active_connections", "active_interfaces", "captured_at")
+    USER_SESSIONS_TOTAL_FIELD_NUMBER: _ClassVar[int]
+    USER_SESSIONS_UPDATES_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    USAGE_DAYS_TOTAL_FIELD_NUMBER: _ClassVar[int]
+    BOT_ACCESS_TOTAL_FIELD_NUMBER: _ClassVar[int]
+    ACTIVE_CONNECTIONS_FIELD_NUMBER: _ClassVar[int]
+    ACTIVE_INTERFACES_FIELD_NUMBER: _ClassVar[int]
+    CAPTURED_AT_FIELD_NUMBER: _ClassVar[int]
+    user_sessions_total: int
+    user_sessions_updates_enabled: int
+    usage_days_total: int
+    bot_access_total: int
+    active_connections: int
+    active_interfaces: int
+    captured_at: _timestamp_pb2.Timestamp
+    def __init__(self, user_sessions_total: _Optional[int] = ..., user_sessions_updates_enabled: _Optional[int] = ..., usage_days_total: _Optional[int] = ..., bot_access_total: _Optional[int] = ..., active_connections: _Optional[int] = ..., active_interfaces: _Optional[int] = ..., captured_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+
 class GetSessionSnapshotsRequest(_message.Message):
     __slots__ = ("session_peer_ids",)
     SESSION_PEER_IDS_FIELD_NUMBER: _ClassVar[int]

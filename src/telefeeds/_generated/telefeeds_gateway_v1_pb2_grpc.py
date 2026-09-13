@@ -48,6 +48,11 @@ class TelegramGatewayStub:
                 request_serializer=telefeeds__gateway__v1__pb2.InvokeRequest.SerializeToString,
                 response_deserializer=telefeeds__gateway__v1__pb2.InvokeResponse.FromString,
                 _registered_method=True)
+        self.GetIntegrationSnapshot = channel.unary_unary(
+                '/telefeeds.telegram.v1.TelegramGateway/GetIntegrationSnapshot',
+                request_serializer=telefeeds__gateway__v1__pb2.GetIntegrationSnapshotRequest.SerializeToString,
+                response_deserializer=telefeeds__gateway__v1__pb2.IntegrationSnapshot.FromString,
+                _registered_method=True)
         self.GetSessionSnapshots = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/GetSessionSnapshots',
                 request_serializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsRequest.SerializeToString,
@@ -114,6 +119,12 @@ class TelegramGatewayServicer:
         raise NotImplementedError('Method not implemented!')
 
     def Invoke(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetIntegrationSnapshot(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -191,6 +202,11 @@ def add_TelegramGatewayServicer_to_server(servicer, server):
                     servicer.Invoke,
                     request_deserializer=telefeeds__gateway__v1__pb2.InvokeRequest.FromString,
                     response_serializer=telefeeds__gateway__v1__pb2.InvokeResponse.SerializeToString,
+            ),
+            'GetIntegrationSnapshot': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetIntegrationSnapshot,
+                    request_deserializer=telefeeds__gateway__v1__pb2.GetIntegrationSnapshotRequest.FromString,
+                    response_serializer=telefeeds__gateway__v1__pb2.IntegrationSnapshot.SerializeToString,
             ),
             'GetSessionSnapshots': grpc.unary_unary_rpc_method_handler(
                     servicer.GetSessionSnapshots,
@@ -301,6 +317,33 @@ class TelegramGateway:
             '/telefeeds.telegram.v1.TelegramGateway/Invoke',
             telefeeds__gateway__v1__pb2.InvokeRequest.SerializeToString,
             telefeeds__gateway__v1__pb2.InvokeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetIntegrationSnapshot(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/GetIntegrationSnapshot',
+            telefeeds__gateway__v1__pb2.GetIntegrationSnapshotRequest.SerializeToString,
+            telefeeds__gateway__v1__pb2.IntegrationSnapshot.FromString,
             options,
             channel_credentials,
             insecure,

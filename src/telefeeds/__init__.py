@@ -22,6 +22,8 @@ from ._core import (
     GatewayError,
     GatewayErrorCode,
     GatewayInvokeError,
+    IntegrationMetricsSnapshot,
+    IntegrationSnapshot,
     IntegrationUserSession,
     InvalidAuthorizationAttemptError,
     InvalidAuthorizationCodeError,
@@ -65,6 +67,8 @@ __all__ = [
     "GatewayError",
     "GatewayErrorCode",
     "GatewayInvokeError",
+    "IntegrationMetricsSnapshot",
+    "IntegrationSnapshot",
     "IntegrationUserSession",
     "InvalidAuthorizationAttemptError",
     "InvalidAuthorizationCodeError",
@@ -84,4 +88,4 @@ __all__ = [
     "UserSessionPage",
 ]
 
-__version__ = "0.2.5"
+__version__ = "0.2.7"

@@ -25,6 +25,8 @@ from .models import (
     AuthorizationKind,
     AuthorizationResult,
     AuthorizationState,
+    IntegrationMetricsSnapshot,
+    IntegrationSnapshot,
     IntegrationUserSession,
     SessionRegistration,
     SessionSnapshot,
@@ -268,6 +270,56 @@ class TelefeedsClient:
             for session in response.sessions
         ]
 
+    async def get_integration_snapshot(
+        self,
+        *,
+        timeout: float | None = None,
+    ) -> IntegrationSnapshot:
+        response = await rpc_result(
+            self.require_stub().GetIntegrationSnapshot(
+                gateway.GetIntegrationSnapshotRequest(),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
+        )
+        metrics = response.metrics
+        return IntegrationSnapshot(
+            integration_id=response.integration_id,
+            client_id=response.client_id,
+            name=response.name,
+            enabled=response.enabled,
+            allow_user_sessions=response.allow_user_sessions,
+            telegram_credentials_configured=(response.telegram_credentials_configured),
+            granted_scopes=tuple(response.granted_scopes),
+            default_interface=response.default_interface,
+            default_close_other=response.default_close_other,
+            proxy_pool_size=response.proxy_pool_size,
+            user_session_day_price_cents=(response.user_session_day_price_cents),
+            created_at=(
+                response.created_at.ToDatetime(tzinfo=timezone.utc)
+                if response.HasField("created_at")
+                else None
+            ),
+            updated_at=(
+                response.updated_at.ToDatetime(tzinfo=timezone.utc)
+                if response.HasField("updated_at")
+                else None
+            ),
+            metrics=IntegrationMetricsSnapshot(
+                user_sessions_total=metrics.user_sessions_total,
+                user_sessions_updates_enabled=(metrics.user_sessions_updates_enabled),
+                usage_days_total=metrics.usage_days_total,
+                bot_access_total=metrics.bot_access_total,
+                active_connections=metrics.active_connections,
+                active_interfaces=metrics.active_interfaces,
+                captured_at=(
+                    metrics.captured_at.ToDatetime(tzinfo=timezone.utc)
+                    if metrics.HasField("captured_at")
+                    else None
+                ),
+            ),
+        )
+
     async def get_session_subscription(
         self,
         session_peer_id: int,
@@ -357,9 +409,7 @@ class TelefeedsClient:
                     state=session.state,
                     updates_enabled=session.updates_enabled,
                     updates_state_changed_at=(
-                        session.updates_state_changed_at.ToDatetime(
-                            tzinfo=timezone.utc
-                        )
+                        session.updates_state_changed_at.ToDatetime(tzinfo=timezone.utc)
                         if session.HasField("updates_state_changed_at")
                         else None
                     ),

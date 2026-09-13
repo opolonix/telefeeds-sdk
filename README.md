@@ -118,6 +118,17 @@ except AuthorizationAttemptExpiredError:
 
 Низкоуровневый `TelefeedsClient` предоставляет `subscribe()`, `invoke_raw()`, `get_session_snapshots()` и RPC регистрации. Он работает с protobuf-моделями и не требует Pyrogram.
 
+Информацию об интеграции и компактные счётчики можно получить одним дешёвым запросом без обращения к Core и MetricsHub:
+
+```python
+snapshot = await app.get_integration_snapshot()
+print(snapshot.integration_id, snapshot.name, snapshot.granted_scopes)
+print(snapshot.metrics.user_sessions_total)
+print(snapshot.metrics.active_connections)
+```
+
+Снапшот содержит эффективные значения `default_interface` и `default_close_other`, настройки доступа к пользовательским сессиям, размер proxy pool, тариф, число активных интерфейсов и накопленные дни использования. Управление токенами через публичный интерфейс не предоставляется.
+
 Дешёвый список связанных с интеграцией сессий читается из базы без обращения к Core:
 
 ```python

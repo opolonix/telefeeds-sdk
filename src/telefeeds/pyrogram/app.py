@@ -16,6 +16,7 @@ from telefeeds._core import (
     AuthorizationResult,
     GatewayError,
     GatewayErrorCode,
+    IntegrationSnapshot,
     SessionRegistration,
     SessionSnapshot,
     SessionSubscription,
@@ -612,6 +613,9 @@ class Telefeeds(HandlerRegistrar):
         self, session_peer_ids: list[int] | tuple[int, ...] = ()
     ) -> list[SessionSnapshot]:
         return await self.gateway.get_session_snapshots(session_peer_ids)
+
+    async def get_integration_snapshot(self) -> IntegrationSnapshot:
+        return await self.gateway.get_integration_snapshot()
 
     async def get_session_subscription(
         self, session_peer_id: int

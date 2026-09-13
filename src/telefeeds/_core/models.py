@@ -15,6 +15,35 @@ class UpdateEnvelope:
 
 
 @dataclass(frozen=True, slots=True)
+class IntegrationMetricsSnapshot:
+    user_sessions_total: int
+    user_sessions_updates_enabled: int
+    usage_days_total: int
+    bot_access_total: int
+    active_connections: int
+    active_interfaces: int
+    captured_at: datetime | None
+
+
+@dataclass(frozen=True, slots=True)
+class IntegrationSnapshot:
+    integration_id: str
+    client_id: int
+    name: str
+    enabled: bool
+    allow_user_sessions: bool
+    telegram_credentials_configured: bool
+    granted_scopes: tuple[str, ...]
+    default_interface: int
+    default_close_other: bool
+    proxy_pool_size: int
+    user_session_day_price_cents: float
+    created_at: datetime | None
+    updated_at: datetime | None
+    metrics: IntegrationMetricsSnapshot
+
+
+@dataclass(frozen=True, slots=True)
 class SessionSnapshot:
     session_peer_id: int
     state: str
