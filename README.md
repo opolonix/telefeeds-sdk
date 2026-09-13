@@ -72,7 +72,24 @@ me = await client.get_me()
 
 ClientHub проверяет принадлежность `session_peer_id` интеграции перед каждым `Invoke`. Telegram RPC errors возвращаются как структурированные исключения. Загрузки разбиваются на части, имеют timeout и повтор конкретной части; `cdn_supported=False` устанавливается автоматически.
 
-Ошибки ClientHub доступны как `GatewayError` с независимыми от grpcio полями `code: GatewayErrorCode` и `details`. Низкоуровневые `grpc.aio.AioRpcError` не выходят из SDK.
+Ошибки ClientHub доступны как `GatewayError` с независимыми от grpcio полями `code: GatewayErrorCode` и `details`. Низкоуровневые `grpc.aio.AioRpcError` не выходят из SDK. Ожидаемые ошибки регистрации представлены отдельными классами:
+
+```python
+from telefeeds import (
+    AuthorizationAttemptExpiredError,
+    InvalidAuthorizationCodeError,
+    InvalidAuthorizationPasswordError,
+)
+
+try:
+    session = await gateway.complete_password_authorization(authorization_id, password)
+except InvalidAuthorizationPasswordError:
+    print("Неверный пароль")
+except AuthorizationAttemptExpiredError:
+    print("Попытка авторизации истекла")
+```
+
+Полная иерархия начинается с `AuthorizationError`. Для сырого gRPC-клиента ClientHub передаёт стабильную причину в trailing metadata `telefeeds-error-code`; значения перечислены в `AuthorizationErrorCode` protobuf-контракта.
 
 Низкоуровневый `TelefeedsClient` предоставляет `subscribe()`, `invoke_raw()`, `get_session_snapshots()` и RPC регистрации. Он работает с protobuf-моделями и не требует Pyrogram.
 

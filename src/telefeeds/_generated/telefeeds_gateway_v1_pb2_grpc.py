@@ -28,6 +28,8 @@ if _version_not_supported:
 class TelegramGatewayStub:
     """Public Telegram user-session gateway. Every RPC requires the metadata header
     `authorization: Bearer <integration_access_token>`.
+    Authorization failures include `telefeeds-error-code` trailing metadata whose
+    value is the matching AuthorizationErrorCode enum value name.
     """
 
     def __init__(self, channel):
@@ -81,6 +83,8 @@ class TelegramGatewayStub:
 class TelegramGatewayServicer:
     """Public Telegram user-session gateway. Every RPC requires the metadata header
     `authorization: Bearer <integration_access_token>`.
+    Authorization failures include `telefeeds-error-code` trailing metadata whose
+    value is the matching AuthorizationErrorCode enum value name.
     """
 
     def Subscribe(self, request, context):
@@ -185,6 +189,8 @@ def add_TelegramGatewayServicer_to_server(servicer, server):
 class TelegramGateway:
     """Public Telegram user-session gateway. Every RPC requires the metadata header
     `authorization: Bearer <integration_access_token>`.
+    Authorization failures include `telefeeds-error-code` trailing metadata whose
+    value is the matching AuthorizationErrorCode enum value name.
     """
 
     @staticmethod

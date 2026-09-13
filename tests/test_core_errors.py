@@ -1,6 +1,15 @@
 import grpc
 
-from telefeeds import GatewayError, GatewayErrorCode, TelefeedsError, TelegramRPCError
+from telefeeds import (
+    AuthorizationError,
+    AuthorizationErrorCode,
+    GatewayError,
+    GatewayErrorCode,
+    InvalidAuthorizationCodeError,
+    InvalidAuthorizationPasswordError,
+    TelefeedsError,
+    TelegramRPCError,
+)
 from telefeeds._core.client import gateway_error
 
 
@@ -26,3 +35,36 @@ def test_gateway_error_does_not_expose_grpc_types() -> None:
     assert isinstance(error, TelefeedsError)
     assert error.code == GatewayErrorCode.INVALID_ARGUMENT
     assert error.details == "code is invalid"
+
+
+def test_gateway_error_maps_authorization_machine_codes_to_specific_errors() -> None:
+    password_error = gateway_error(
+        grpc.aio.AioRpcError(
+            grpc.StatusCode.INVALID_ARGUMENT,
+            trailing_metadata=grpc.aio.Metadata(
+                (
+                    "telefeeds-error-code",
+                    "AUTHORIZATION_ERROR_CODE_PASSWORD_INVALID",
+                )
+            ),
+            details="invalid Telegram 2FA password",
+        )
+    )
+    code_error = gateway_error(
+        grpc.aio.AioRpcError(
+            grpc.StatusCode.INVALID_ARGUMENT,
+            trailing_metadata=grpc.aio.Metadata(
+                (
+                    "telefeeds-error-code",
+                    "AUTHORIZATION_ERROR_CODE_CODE_INVALID",
+                )
+            ),
+            details="invalid Telegram authorization code",
+        )
+    )
+
+    assert type(password_error) is InvalidAuthorizationPasswordError
+    assert isinstance(password_error, AuthorizationError)
+    assert password_error.reason is AuthorizationErrorCode.PASSWORD_INVALID
+    assert type(code_error) is InvalidAuthorizationCodeError
+    assert code_error.reason is AuthorizationErrorCode.CODE_INVALID

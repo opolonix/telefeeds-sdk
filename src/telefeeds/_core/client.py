@@ -11,7 +11,13 @@ from typing_extensions import Self
 from telefeeds._generated import telefeeds_gateway_v1_pb2 as gateway
 from telefeeds._generated import telefeeds_gateway_v1_pb2_grpc as gateway_grpc
 
-from .errors import GatewayError, GatewayErrorCode, GatewayInvokeError, TelegramRPCError
+from .errors import (
+    AUTHORIZATION_ERROR_TYPES,
+    GatewayError,
+    GatewayErrorCode,
+    GatewayInvokeError,
+    TelegramRPCError,
+)
 from .models import (
     AuthorizationChallenge,
     AuthorizationCodeProvider,
@@ -28,7 +34,14 @@ ResponseType = TypeVar("ResponseType")
 
 
 def gateway_error(error: grpc.aio.AioRpcError) -> GatewayError:
-    return GatewayError(
+    error_type: type[GatewayError] = GatewayError
+    trailing_metadata = error.trailing_metadata()
+    if trailing_metadata is not None:
+        for key, value in trailing_metadata:
+            if key == "telefeeds-error-code":
+                error_type = AUTHORIZATION_ERROR_TYPES.get(str(value), GatewayError)
+                break
+    return error_type(
         code=GatewayErrorCode(error.code().name),
         details=error.details() or "",
     )

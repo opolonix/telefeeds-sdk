@@ -16,6 +16,27 @@ class AuthorizationKind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     AUTHORIZATION_KIND_NATIVE: _ClassVar[AuthorizationKind]
     AUTHORIZATION_KIND_PROVIDER: _ClassVar[AuthorizationKind]
 
+class AuthorizationErrorCode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    AUTHORIZATION_ERROR_CODE_UNSPECIFIED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_CREDENTIALS_REQUIRED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_CREDENTIALS_INVALID: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_ATTEMPT_INVALID: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_ATTEMPT_NOT_FOUND: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_ATTEMPT_FORBIDDEN: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_ATTEMPT_EXPIRED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_PHONE_INVALID: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_PHONE_BANNED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_CODE_INVALID: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_CODE_EXPIRED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_PASSWORD_INVALID: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_PASSWORD_NOT_EXPECTED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_SIGN_UP_REQUIRED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_SESSION_ACCESS_DISABLED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_PROVIDER_UNAVAILABLE: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_PERMISSION_DENIED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_RATE_LIMITED: _ClassVar[AuthorizationErrorCode]
+
 class AuthorizationCodeProviderKind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     AUTHORIZATION_CODE_PROVIDER_KIND_UNSPECIFIED: _ClassVar[AuthorizationCodeProviderKind]
@@ -30,6 +51,24 @@ class PhoneAuthorizationState(int, metaclass=_enum_type_wrapper.EnumTypeWrapper)
 AUTHORIZATION_KIND_UNSPECIFIED: AuthorizationKind
 AUTHORIZATION_KIND_NATIVE: AuthorizationKind
 AUTHORIZATION_KIND_PROVIDER: AuthorizationKind
+AUTHORIZATION_ERROR_CODE_UNSPECIFIED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_CREDENTIALS_REQUIRED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_CREDENTIALS_INVALID: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_ATTEMPT_INVALID: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_ATTEMPT_NOT_FOUND: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_ATTEMPT_FORBIDDEN: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_ATTEMPT_EXPIRED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_PHONE_INVALID: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_PHONE_BANNED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_CODE_INVALID: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_CODE_EXPIRED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_PASSWORD_INVALID: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_PASSWORD_NOT_EXPECTED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_SIGN_UP_REQUIRED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_SESSION_ACCESS_DISABLED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_PROVIDER_UNAVAILABLE: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_PERMISSION_DENIED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_RATE_LIMITED: AuthorizationErrorCode
 AUTHORIZATION_CODE_PROVIDER_KIND_UNSPECIFIED: AuthorizationCodeProviderKind
 AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_GATEWAY: AuthorizationCodeProviderKind
 AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_BOT: AuthorizationCodeProviderKind

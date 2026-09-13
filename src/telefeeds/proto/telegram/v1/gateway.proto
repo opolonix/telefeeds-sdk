@@ -6,6 +6,8 @@ import "google/protobuf/timestamp.proto";
 
 // Public Telegram user-session gateway. Every RPC requires the metadata header
 // `authorization: Bearer <integration_access_token>`.
+// Authorization failures include `telefeeds-error-code` trailing metadata whose
+// value is the matching AuthorizationErrorCode enum value name.
 service TelegramGateway {
   rpc Subscribe(SubscribeRequest) returns (stream UpdateEnvelope);
   rpc Invoke(InvokeRequest) returns (InvokeResponse);
@@ -89,6 +91,27 @@ enum AuthorizationKind {
   AUTHORIZATION_KIND_NATIVE = 1;
   // Подтверждение владения уже существующей сессией без замены auth key.
   AUTHORIZATION_KIND_PROVIDER = 2;
+}
+
+enum AuthorizationErrorCode {
+  AUTHORIZATION_ERROR_CODE_UNSPECIFIED = 0;
+  AUTHORIZATION_ERROR_CODE_CREDENTIALS_REQUIRED = 1;
+  AUTHORIZATION_ERROR_CODE_CREDENTIALS_INVALID = 2;
+  AUTHORIZATION_ERROR_CODE_ATTEMPT_INVALID = 3;
+  AUTHORIZATION_ERROR_CODE_ATTEMPT_NOT_FOUND = 4;
+  AUTHORIZATION_ERROR_CODE_ATTEMPT_FORBIDDEN = 5;
+  AUTHORIZATION_ERROR_CODE_ATTEMPT_EXPIRED = 6;
+  AUTHORIZATION_ERROR_CODE_PHONE_INVALID = 7;
+  AUTHORIZATION_ERROR_CODE_PHONE_BANNED = 8;
+  AUTHORIZATION_ERROR_CODE_CODE_INVALID = 9;
+  AUTHORIZATION_ERROR_CODE_CODE_EXPIRED = 10;
+  AUTHORIZATION_ERROR_CODE_PASSWORD_INVALID = 11;
+  AUTHORIZATION_ERROR_CODE_PASSWORD_NOT_EXPECTED = 12;
+  AUTHORIZATION_ERROR_CODE_SIGN_UP_REQUIRED = 13;
+  AUTHORIZATION_ERROR_CODE_SESSION_ACCESS_DISABLED = 14;
+  AUTHORIZATION_ERROR_CODE_PROVIDER_UNAVAILABLE = 15;
+  AUTHORIZATION_ERROR_CODE_PERMISSION_DENIED = 16;
+  AUTHORIZATION_ERROR_CODE_RATE_LIMITED = 17;
 }
 
 enum AuthorizationCodeProviderKind {
