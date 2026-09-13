@@ -343,6 +343,14 @@ class Telefeeds(HandlerRegistrar):
         client.session = GrpcSession(self.gateway, session_peer_id, client)
         client.is_connected = True
         client.is_initialized = True
+        try:
+            client.me = await client.get_me()
+        except BaseException:
+            await client.storage.close()
+            client.executor.shutdown(wait=False, cancel_futures=True)
+            client.is_connected = False
+            client.is_initialized = False
+            raise
         self.clients[(session_kind, session_peer_id)] = client
         connect_handler = getattr(handlers, "ConnectHandler", None)
         start_handler = getattr(handlers, "StartHandler", None)

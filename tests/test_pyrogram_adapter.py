@@ -74,6 +74,23 @@ class FakeGateway:
                 mtime=0,
                 bytes=b"downloaded",
             ).write()
+        if isinstance(request, raw.functions.users.GetFullUser):
+            return raw.types.users.UserFull(
+                full_user=raw.types.UserFull(
+                    id=session_peer_id,
+                    settings=raw.types.PeerSettings(),
+                    notify_settings=raw.types.PeerNotifySettings(),
+                    common_chats_count=0,
+                ),
+                chats=[],
+                users=[
+                    raw.types.User(
+                        id=session_peer_id,
+                        is_self=True,
+                        first_name="Telefeeds",
+                    )
+                ],
+            ).write()
         return BoolTrue()
 
     async def get_session_subscription(self, session_peer_id: int):
@@ -111,6 +128,15 @@ async def test_clients_are_isolated_and_use_selected_client() -> None:
     assert first.storage is not second.storage
     assert first.session.session_peer_id == 100
     assert second.session.session_peer_id == 200
+    assert first.me.id == 100
+    assert second.me.id == 200
+    assert (
+        sum(
+            isinstance(request, raw.functions.users.GetFullUser)
+            for session_peer_id, request, dc_id in gateway.requests
+        )
+        == 2
+    )
 
     await app.stop_async()
 
@@ -406,9 +432,9 @@ async def test_min_peer_refresh_does_not_delay_handler_and_populates_cache() -> 
 @pytest.mark.asyncio
 async def test_structured_file_part_error_becomes_pyrogram_error() -> None:
     gateway = FakeGateway()
-    gateway.rpc_error = TelegramRPCError(400, "FILE_PART_MISSING", value=7)
     app = Telefeeds("token", gateway=gateway)
     client = await app.get_client(100)
+    gateway.rpc_error = TelegramRPCError(400, "FILE_PART_MISSING", value=7)
 
     with pytest.raises(FilePartMissing) as raised:
         await client.invoke(
