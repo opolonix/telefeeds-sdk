@@ -80,12 +80,20 @@ ClientHub проверяет принадлежность `session_peer_id` ин
 
 - [Минимальный Pyrogram-клиент](examples/pyrogram_client.py)
 - [Telefeeds и aiogram в одном процессе](examples/pyrogram_and_aiogram.py)
+- [Регистрация пользовательского аккаунта](examples/register_account.py)
 
 ```bash
 pip install telefeeds-sdk kurigram aiogram
 export TELEFEEDS_TOKEN='tfi_...'
 export TELEGRAM_BOT_TOKEN='123456:...'
 python examples/pyrogram_and_aiogram.py
+```
+
+Для регистрации интеграции должен быть разрешён доступ к пользовательским сессиям:
+
+```bash
+export TELEFEEDS_TOKEN='tfi_...'
+python examples/register_account.py
 ```
 
 Контракт gRPC v1 находится в [`telefeeds/proto/telegram/v1/gateway.proto`](src/telefeeds/proto/telegram/v1/gateway.proto). Публичный адрес: `telegram.telefeeds.ru:443`; авторизация передаётся как `authorization: Bearer <token>`.

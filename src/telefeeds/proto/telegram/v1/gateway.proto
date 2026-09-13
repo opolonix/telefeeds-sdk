@@ -86,6 +86,7 @@ message BeginPhoneAuthorizationRequest {
 message BeginPhoneAuthorizationResponse {
   string authorization_id = 1;
   google.protobuf.Timestamp expires_at = 2;
+  optional uint32 code_length = 3;
 }
 
 message CompletePhoneAuthorizationRequest {

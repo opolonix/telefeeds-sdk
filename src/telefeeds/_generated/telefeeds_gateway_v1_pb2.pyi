@@ -138,12 +138,14 @@ class BeginPhoneAuthorizationRequest(_message.Message):
     def __init__(self, phone_number: _Optional[str] = ...) -> None: ...
 
 class BeginPhoneAuthorizationResponse(_message.Message):
-    __slots__ = ("authorization_id", "expires_at")
+    __slots__ = ("authorization_id", "expires_at", "code_length")
     AUTHORIZATION_ID_FIELD_NUMBER: _ClassVar[int]
     EXPIRES_AT_FIELD_NUMBER: _ClassVar[int]
+    CODE_LENGTH_FIELD_NUMBER: _ClassVar[int]
     authorization_id: str
     expires_at: _timestamp_pb2.Timestamp
-    def __init__(self, authorization_id: _Optional[str] = ..., expires_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    code_length: int
+    def __init__(self, authorization_id: _Optional[str] = ..., expires_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., code_length: _Optional[int] = ...) -> None: ...
 
 class CompletePhoneAuthorizationRequest(_message.Message):
     __slots__ = ("authorization_id", "code")

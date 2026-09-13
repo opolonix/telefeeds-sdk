@@ -47,6 +47,7 @@ class SessionRegistration:
 class AuthorizationChallenge:
     authorization_id: str
     expires_at: datetime | None
+    code_length: int | None
 
 
 class AuthorizationState(IntEnum):

@@ -222,6 +222,9 @@ class TelefeedsClient:
                 if response.HasField("expires_at")
                 else None
             ),
+            code_length=response.code_length
+            if response.HasField("code_length")
+            else None,
         )
 
     async def complete_phone_authorization(
