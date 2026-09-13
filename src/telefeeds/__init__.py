@@ -1,5 +1,8 @@
 from ._core import (
     AuthorizationChallenge,
+    AuthorizationCodeProvider,
+    AuthorizationCodeProviderKind,
+    AuthorizationKind,
     AuthorizationResult,
     AuthorizationState,
     GatewayInvokeError,
@@ -13,6 +16,9 @@ from ._core import (
 
 __all__ = [
     "AuthorizationChallenge",
+    "AuthorizationCodeProvider",
+    "AuthorizationCodeProviderKind",
+    "AuthorizationKind",
     "AuthorizationResult",
     "AuthorizationState",
     "GatewayInvokeError",
@@ -24,4 +30,4 @@ __all__ = [
     "UpdateEnvelope",
 ]
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"

@@ -10,11 +10,29 @@ from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class AuthorizationKind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    AUTHORIZATION_KIND_UNSPECIFIED: _ClassVar[AuthorizationKind]
+    AUTHORIZATION_KIND_NATIVE: _ClassVar[AuthorizationKind]
+    AUTHORIZATION_KIND_PROVIDER: _ClassVar[AuthorizationKind]
+
+class AuthorizationCodeProviderKind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    AUTHORIZATION_CODE_PROVIDER_KIND_UNSPECIFIED: _ClassVar[AuthorizationCodeProviderKind]
+    AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_GATEWAY: _ClassVar[AuthorizationCodeProviderKind]
+    AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_BOT: _ClassVar[AuthorizationCodeProviderKind]
+
 class PhoneAuthorizationState(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     PHONE_AUTHORIZATION_STATE_UNSPECIFIED: _ClassVar[PhoneAuthorizationState]
     PHONE_AUTHORIZATION_STATE_PASSWORD_REQUIRED: _ClassVar[PhoneAuthorizationState]
     PHONE_AUTHORIZATION_STATE_AUTHORIZED: _ClassVar[PhoneAuthorizationState]
+AUTHORIZATION_KIND_UNSPECIFIED: AuthorizationKind
+AUTHORIZATION_KIND_NATIVE: AuthorizationKind
+AUTHORIZATION_KIND_PROVIDER: AuthorizationKind
+AUTHORIZATION_CODE_PROVIDER_KIND_UNSPECIFIED: AuthorizationCodeProviderKind
+AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_GATEWAY: AuthorizationCodeProviderKind
+AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_BOT: AuthorizationCodeProviderKind
 PHONE_AUTHORIZATION_STATE_UNSPECIFIED: PhoneAuthorizationState
 PHONE_AUTHORIZATION_STATE_PASSWORD_REQUIRED: PhoneAuthorizationState
 PHONE_AUTHORIZATION_STATE_AUTHORIZED: PhoneAuthorizationState
@@ -131,6 +149,18 @@ class SessionSnapshot(_message.Message):
     tl_layer: int
     def __init__(self, session_peer_id: _Optional[int] = ..., state: _Optional[str] = ..., alive: _Optional[bool] = ..., fatal: _Optional[bool] = ..., proxy_broken: _Optional[bool] = ..., uptime_ms: _Optional[int] = ..., updates_per_second: _Optional[float] = ..., invokes_per_second: _Optional[float] = ..., invokes_in_flight: _Optional[int] = ..., memory_bytes: _Optional[int] = ..., updates_total: _Optional[int] = ..., invokes_total: _Optional[int] = ..., last_error: _Optional[str] = ..., updated_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., media_upload_bytes: _Optional[int] = ..., media_download_bytes: _Optional[int] = ..., media_requests_total: _Optional[int] = ..., media_requests_in_flight: _Optional[int] = ..., tl_layer: _Optional[int] = ...) -> None: ...
 
+class AuthorizationCodeProvider(_message.Message):
+    __slots__ = ("kind", "url", "code_secret", "requires_open_url")
+    KIND_FIELD_NUMBER: _ClassVar[int]
+    URL_FIELD_NUMBER: _ClassVar[int]
+    CODE_SECRET_FIELD_NUMBER: _ClassVar[int]
+    REQUIRES_OPEN_URL_FIELD_NUMBER: _ClassVar[int]
+    kind: AuthorizationCodeProviderKind
+    url: str
+    code_secret: str
+    requires_open_url: bool
+    def __init__(self, kind: _Optional[_Union[AuthorizationCodeProviderKind, str]] = ..., url: _Optional[str] = ..., code_secret: _Optional[str] = ..., requires_open_url: _Optional[bool] = ...) -> None: ...
+
 class BeginPhoneAuthorizationRequest(_message.Message):
     __slots__ = ("phone_number",)
     PHONE_NUMBER_FIELD_NUMBER: _ClassVar[int]
@@ -138,14 +168,52 @@ class BeginPhoneAuthorizationRequest(_message.Message):
     def __init__(self, phone_number: _Optional[str] = ...) -> None: ...
 
 class BeginPhoneAuthorizationResponse(_message.Message):
-    __slots__ = ("authorization_id", "expires_at", "code_length")
+    __slots__ = ("authorization_id", "expires_at", "code_length", "authorization_kind", "code_provider")
     AUTHORIZATION_ID_FIELD_NUMBER: _ClassVar[int]
     EXPIRES_AT_FIELD_NUMBER: _ClassVar[int]
     CODE_LENGTH_FIELD_NUMBER: _ClassVar[int]
+    AUTHORIZATION_KIND_FIELD_NUMBER: _ClassVar[int]
+    CODE_PROVIDER_FIELD_NUMBER: _ClassVar[int]
     authorization_id: str
     expires_at: _timestamp_pb2.Timestamp
     code_length: int
-    def __init__(self, authorization_id: _Optional[str] = ..., expires_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., code_length: _Optional[int] = ...) -> None: ...
+    authorization_kind: AuthorizationKind
+    code_provider: AuthorizationCodeProvider
+    def __init__(self, authorization_id: _Optional[str] = ..., expires_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., code_length: _Optional[int] = ..., authorization_kind: _Optional[_Union[AuthorizationKind, str]] = ..., code_provider: _Optional[_Union[AuthorizationCodeProvider, _Mapping]] = ...) -> None: ...
+
+class BeginExistingSessionAuthorizationRequest(_message.Message):
+    __slots__ = ("session_peer_id",)
+    SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
+    session_peer_id: int
+    def __init__(self, session_peer_id: _Optional[int] = ...) -> None: ...
+
+class BeginExistingSessionAuthorizationResponse(_message.Message):
+    __slots__ = ("authorization_id", "expires_at", "code_length", "authorization_kind", "code_provider")
+    AUTHORIZATION_ID_FIELD_NUMBER: _ClassVar[int]
+    EXPIRES_AT_FIELD_NUMBER: _ClassVar[int]
+    CODE_LENGTH_FIELD_NUMBER: _ClassVar[int]
+    AUTHORIZATION_KIND_FIELD_NUMBER: _ClassVar[int]
+    CODE_PROVIDER_FIELD_NUMBER: _ClassVar[int]
+    authorization_id: str
+    expires_at: _timestamp_pb2.Timestamp
+    code_length: int
+    authorization_kind: AuthorizationKind
+    code_provider: AuthorizationCodeProvider
+    def __init__(self, authorization_id: _Optional[str] = ..., expires_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., code_length: _Optional[int] = ..., authorization_kind: _Optional[_Union[AuthorizationKind, str]] = ..., code_provider: _Optional[_Union[AuthorizationCodeProvider, _Mapping]] = ...) -> None: ...
+
+class CompleteExistingSessionAuthorizationRequest(_message.Message):
+    __slots__ = ("authorization_id", "code")
+    AUTHORIZATION_ID_FIELD_NUMBER: _ClassVar[int]
+    CODE_FIELD_NUMBER: _ClassVar[int]
+    authorization_id: str
+    code: str
+    def __init__(self, authorization_id: _Optional[str] = ..., code: _Optional[str] = ...) -> None: ...
+
+class CompleteExistingSessionAuthorizationResponse(_message.Message):
+    __slots__ = ("session",)
+    SESSION_FIELD_NUMBER: _ClassVar[int]
+    session: SessionRegistration
+    def __init__(self, session: _Optional[_Union[SessionRegistration, _Mapping]] = ...) -> None: ...
 
 class CompletePhoneAuthorizationRequest(_message.Message):
     __slots__ = ("authorization_id", "code")

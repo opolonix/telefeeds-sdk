@@ -13,6 +13,8 @@ service TelegramGateway {
   rpc BeginPhoneAuthorization(BeginPhoneAuthorizationRequest) returns (BeginPhoneAuthorizationResponse);
   rpc CompletePhoneAuthorization(CompletePhoneAuthorizationRequest) returns (CompletePhoneAuthorizationResponse);
   rpc CompletePasswordAuthorization(CompletePasswordAuthorizationRequest) returns (CompletePasswordAuthorizationResponse);
+  rpc BeginExistingSessionAuthorization(BeginExistingSessionAuthorizationRequest) returns (BeginExistingSessionAuthorizationResponse);
+  rpc CompleteExistingSessionAuthorization(CompleteExistingSessionAuthorizationRequest) returns (CompleteExistingSessionAuthorizationResponse);
 }
 
 message SubscribeRequest {
@@ -79,6 +81,30 @@ message SessionSnapshot {
   optional int32 tl_layer = 19;
 }
 
+enum AuthorizationKind {
+  AUTHORIZATION_KIND_UNSPECIFIED = 0;
+  // Новый вход в Telegram с выпуском или заменой MTProto auth key.
+  AUTHORIZATION_KIND_NATIVE = 1;
+  // Подтверждение владения уже существующей сессией без замены auth key.
+  AUTHORIZATION_KIND_PROVIDER = 2;
+}
+
+enum AuthorizationCodeProviderKind {
+  AUTHORIZATION_CODE_PROVIDER_KIND_UNSPECIFIED = 0;
+  AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_GATEWAY = 1;
+  AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_BOT = 2;
+}
+
+message AuthorizationCodeProvider {
+  AuthorizationCodeProviderKind kind = 1;
+  // Ссылка, которую нужно показать пользователю для получения кода.
+  optional string url = 2;
+  // Одноразовый непрозрачный токен провайдера. Это не код подтверждения.
+  optional string code_secret = 3;
+  // true означает, что доставить код напрямую не удалось и ссылку нужно открыть.
+  bool requires_open_url = 4;
+}
+
 message BeginPhoneAuthorizationRequest {
   string phone_number = 1;
 }
@@ -87,6 +113,29 @@ message BeginPhoneAuthorizationResponse {
   string authorization_id = 1;
   google.protobuf.Timestamp expires_at = 2;
   optional uint32 code_length = 3;
+  AuthorizationKind authorization_kind = 4;
+  optional AuthorizationCodeProvider code_provider = 5;
+}
+
+message BeginExistingSessionAuthorizationRequest {
+  int64 session_peer_id = 1;
+}
+
+message BeginExistingSessionAuthorizationResponse {
+  string authorization_id = 1;
+  google.protobuf.Timestamp expires_at = 2;
+  uint32 code_length = 3;
+  AuthorizationKind authorization_kind = 4;
+  AuthorizationCodeProvider code_provider = 5;
+}
+
+message CompleteExistingSessionAuthorizationRequest {
+  string authorization_id = 1;
+  string code = 2;
+}
+
+message CompleteExistingSessionAuthorizationResponse {
+  SessionRegistration session = 1;
 }
 
 message CompletePhoneAuthorizationRequest {

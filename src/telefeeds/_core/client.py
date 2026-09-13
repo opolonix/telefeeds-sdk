@@ -13,6 +13,9 @@ from telefeeds._generated import telefeeds_gateway_v1_pb2_grpc as gateway_grpc
 from .errors import GatewayInvokeError, TelegramRPCError
 from .models import (
     AuthorizationChallenge,
+    AuthorizationCodeProvider,
+    AuthorizationCodeProviderKind,
+    AuthorizationKind,
     AuthorizationResult,
     AuthorizationState,
     SessionRegistration,
@@ -225,6 +228,75 @@ class TelefeedsClient:
             code_length=response.code_length
             if response.HasField("code_length")
             else None,
+            authorization_kind=AuthorizationKind(response.authorization_kind),
+            code_provider=(
+                AuthorizationCodeProvider(
+                    kind=AuthorizationCodeProviderKind(response.code_provider.kind),
+                    url=response.code_provider.url
+                    if response.code_provider.HasField("url")
+                    else None,
+                    code_secret=response.code_provider.code_secret
+                    if response.code_provider.HasField("code_secret")
+                    else None,
+                    requires_open_url=response.code_provider.requires_open_url,
+                )
+                if response.HasField("code_provider")
+                else None
+            ),
+        )
+
+    async def begin_existing_session_authorization(
+        self,
+        session_peer_id: int,
+        *,
+        timeout: float | None = None,
+    ) -> AuthorizationChallenge:
+        response = await self.require_stub().BeginExistingSessionAuthorization(
+            gateway.BeginExistingSessionAuthorizationRequest(
+                session_peer_id=session_peer_id
+            ),
+            metadata=self.metadata,
+            timeout=self.default_timeout if timeout is None else timeout,
+        )
+        return AuthorizationChallenge(
+            authorization_id=response.authorization_id,
+            expires_at=(
+                response.expires_at.ToDatetime(tzinfo=timezone.utc)
+                if response.HasField("expires_at")
+                else None
+            ),
+            code_length=response.code_length,
+            authorization_kind=AuthorizationKind(response.authorization_kind),
+            code_provider=AuthorizationCodeProvider(
+                kind=AuthorizationCodeProviderKind(response.code_provider.kind),
+                url=response.code_provider.url
+                if response.code_provider.HasField("url")
+                else None,
+                code_secret=response.code_provider.code_secret
+                if response.code_provider.HasField("code_secret")
+                else None,
+                requires_open_url=response.code_provider.requires_open_url,
+            ),
+        )
+
+    async def complete_existing_session_authorization(
+        self,
+        authorization_id: str,
+        code: str,
+        *,
+        timeout: float | None = None,
+    ) -> SessionRegistration:
+        response = await self.require_stub().CompleteExistingSessionAuthorization(
+            gateway.CompleteExistingSessionAuthorizationRequest(
+                authorization_id=authorization_id,
+                code=code,
+            ),
+            metadata=self.metadata,
+            timeout=self.default_timeout if timeout is None else timeout,
+        )
+        return SessionRegistration(
+            session_peer_id=response.session.session_peer_id,
+            state=response.session.state,
         )
 
     async def complete_phone_authorization(

@@ -72,7 +72,9 @@ me = await client.get_me()
 
 ClientHub проверяет принадлежность `session_peer_id` интеграции перед каждым `Invoke`. Telegram RPC errors возвращаются как структурированные исключения. Загрузки разбиваются на части, имеют timeout и повтор конкретной части; `cdn_supported=False` устанавливается автоматически.
 
-Низкоуровневый `TelefeedsClient` предоставляет `subscribe()`, `invoke_raw()`, `get_session_snapshots()` и RPC регистрации по телефону. Он работает с protobuf-моделями и не требует Pyrogram.
+Низкоуровневый `TelefeedsClient` предоставляет `subscribe()`, `invoke_raw()`, `get_session_snapshots()` и RPC регистрации. Он работает с protobuf-моделями и не требует Pyrogram.
+
+Для будущей повторной привязки уже существующей сессии контракт содержит `begin_existing_session_authorization()` и `complete_existing_session_authorization()`. Ответ сообщает способ подтверждения через `authorization_kind` и `code_provider`: Telegram Gateway или Telegram-бот, ссылку для получения кода и необходимость её открыть. Провайдеры пока не включены, поэтому эти два RPC возвращают gRPC `UNIMPLEMENTED`.
 
 ## Router и примеры
 

@@ -342,6 +342,16 @@ class Telefeeds(HandlerRegistrar):
     async def begin_phone_authorization(self, phone_number: str):
         return await self.gateway.begin_phone_authorization(phone_number)
 
+    async def begin_existing_session_authorization(self, session_peer_id: int):
+        return await self.gateway.begin_existing_session_authorization(session_peer_id)
+
+    async def complete_existing_session_authorization(
+        self, authorization_id: str, code: str
+    ):
+        return await self.gateway.complete_existing_session_authorization(
+            authorization_id, code
+        )
+
     async def complete_phone_authorization(self, authorization_id: str, code: str):
         return await self.gateway.complete_phone_authorization(authorization_id, code)
 

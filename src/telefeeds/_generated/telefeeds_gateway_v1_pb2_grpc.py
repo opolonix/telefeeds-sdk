@@ -66,6 +66,16 @@ class TelegramGatewayStub:
                 request_serializer=telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationRequest.SerializeToString,
                 response_deserializer=telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationResponse.FromString,
                 _registered_method=True)
+        self.BeginExistingSessionAuthorization = channel.unary_unary(
+                '/telefeeds.telegram.v1.TelegramGateway/BeginExistingSessionAuthorization',
+                request_serializer=telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationRequest.SerializeToString,
+                response_deserializer=telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationResponse.FromString,
+                _registered_method=True)
+        self.CompleteExistingSessionAuthorization = channel.unary_unary(
+                '/telefeeds.telegram.v1.TelegramGateway/CompleteExistingSessionAuthorization',
+                request_serializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.SerializeToString,
+                response_deserializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.FromString,
+                _registered_method=True)
 
 
 class TelegramGatewayServicer:
@@ -109,6 +119,18 @@ class TelegramGatewayServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def BeginExistingSessionAuthorization(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CompleteExistingSessionAuthorization(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_TelegramGatewayServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -141,6 +163,16 @@ def add_TelegramGatewayServicer_to_server(servicer, server):
                     servicer.CompletePasswordAuthorization,
                     request_deserializer=telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationRequest.FromString,
                     response_serializer=telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationResponse.SerializeToString,
+            ),
+            'BeginExistingSessionAuthorization': grpc.unary_unary_rpc_method_handler(
+                    servicer.BeginExistingSessionAuthorization,
+                    request_deserializer=telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationRequest.FromString,
+                    response_serializer=telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationResponse.SerializeToString,
+            ),
+            'CompleteExistingSessionAuthorization': grpc.unary_unary_rpc_method_handler(
+                    servicer.CompleteExistingSessionAuthorization,
+                    request_deserializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.FromString,
+                    response_serializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -307,6 +339,60 @@ class TelegramGateway:
             '/telefeeds.telegram.v1.TelegramGateway/CompletePasswordAuthorization',
             telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationRequest.SerializeToString,
             telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def BeginExistingSessionAuthorization(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/BeginExistingSessionAuthorization',
+            telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationRequest.SerializeToString,
+            telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CompleteExistingSessionAuthorization(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/CompleteExistingSessionAuthorization',
+            telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.SerializeToString,
+            telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.FromString,
             options,
             channel_credentials,
             insecure,

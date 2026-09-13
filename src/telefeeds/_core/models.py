@@ -43,11 +43,33 @@ class SessionRegistration:
     state: str
 
 
+class AuthorizationKind(IntEnum):
+    UNSPECIFIED = 0
+    NATIVE = 1
+    PROVIDER = 2
+
+
+class AuthorizationCodeProviderKind(IntEnum):
+    UNSPECIFIED = 0
+    TELEGRAM_GATEWAY = 1
+    TELEGRAM_BOT = 2
+
+
+@dataclass(frozen=True, slots=True)
+class AuthorizationCodeProvider:
+    kind: AuthorizationCodeProviderKind
+    url: str | None
+    code_secret: str | None
+    requires_open_url: bool
+
+
 @dataclass(frozen=True, slots=True)
 class AuthorizationChallenge:
     authorization_id: str
     expires_at: datetime | None
     code_length: int | None
+    authorization_kind: AuthorizationKind
+    code_provider: AuthorizationCodeProvider | None
 
 
 class AuthorizationState(IntEnum):

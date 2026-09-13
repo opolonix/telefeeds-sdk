@@ -2,6 +2,9 @@ from .client import TelefeedsClient
 from .errors import GatewayInvokeError, SubscriptionReplacedError, TelegramRPCError
 from .models import (
     AuthorizationChallenge,
+    AuthorizationCodeProvider,
+    AuthorizationCodeProviderKind,
+    AuthorizationKind,
     AuthorizationResult,
     AuthorizationState,
     SessionRegistration,
@@ -11,6 +14,9 @@ from .models import (
 
 __all__ = [
     "AuthorizationChallenge",
+    "AuthorizationCodeProvider",
+    "AuthorizationCodeProviderKind",
+    "AuthorizationKind",
     "AuthorizationResult",
     "AuthorizationState",
     "GatewayInvokeError",
