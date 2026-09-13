@@ -15,6 +15,7 @@ from telefeeds import (
     GatewayErrorCode,
     SubscriptionReplacedError,
     TelegramRPCError,
+    UpdateEnvelope,
 )
 from telefeeds.pyrogram import Router, Telefeeds
 
@@ -47,10 +48,11 @@ class FakeGateway:
         tl_layer: int,
     ):
         self.subscription_attempts += 1
-        event = await self.subscription_events.get()
-        if isinstance(event, BaseException):
-            raise event
-        yield event
+        while True:
+            event = await self.subscription_events.get()
+            if isinstance(event, BaseException):
+                raise event
+            yield event
 
     async def invoke_raw(
         self,
@@ -226,6 +228,178 @@ async def test_router_dispatches_raw_update_with_owning_client() -> None:
     await app.resolve(client, update)
 
     assert received == [(100, 42)]
+    await app.stop_async()
+
+
+@pytest.mark.asyncio
+async def test_update_order_is_per_session_and_sessions_run_concurrently() -> None:
+    gateway = FakeGateway()
+    app = Telefeeds("token", gateway=gateway)
+    first_started = asyncio.Event()
+    release_first = asyncio.Event()
+    second_session_handled = asyncio.Event()
+    first_session_finished = asyncio.Event()
+    handled: list[tuple[int, int]] = []
+
+    @app.on_raw_update()
+    async def handle(client: Client, update, users, chats) -> None:
+        handled.append((client.session_peer_id, update.user_id))
+        if client.session_peer_id == 100 and update.user_id == 1:
+            first_started.set()
+            await release_first.wait()
+        elif client.session_peer_id == 100 and update.user_id == 2:
+            first_session_finished.set()
+        elif client.session_peer_id == 200:
+            second_session_handled.set()
+
+    await app.start_async()
+    for session_peer_id, user_id in ((100, 1), (100, 2), (200, 3)):
+        update = raw.types.UpdateShort(
+            update=raw.types.UpdateUserStatus(
+                user_id=user_id,
+                status=raw.types.UserStatusOnline(expires=1),
+            ),
+            date=1,
+        )
+        await gateway.subscription_events.put(
+            UpdateEnvelope(
+                session_peer_id=session_peer_id,
+                session_kind="user",
+                body=update.write(),
+                received_at=None,
+                tl_layer=raw.all.layer,
+            )
+        )
+
+    await asyncio.wait_for(first_started.wait(), 1)
+    await asyncio.wait_for(second_session_handled.wait(), 1)
+    assert (100, 2) not in handled
+
+    release_first.set()
+    await asyncio.wait_for(first_session_finished.wait(), 1)
+    assert [item for item in handled if item[0] == 100] == [(100, 1), (100, 2)]
+    await app.stop_async()
+
+
+@pytest.mark.asyncio
+async def test_min_peer_refresh_does_not_delay_handler_and_populates_cache() -> None:
+    class DifferenceGateway(FakeGateway):
+        def __init__(self) -> None:
+            super().__init__()
+            self.difference_started = asyncio.Event()
+            self.release_difference = asyncio.Event()
+
+        async def invoke_raw(
+            self,
+            session_peer_id: int,
+            body: bytes,
+            *,
+            dc_id: int | None = None,
+            tl_layer: int,
+            timeout: float | None = None,
+        ) -> bytes:
+            request = TLObject.read(BytesIO(body))
+            if isinstance(request, raw.functions.updates.GetChannelDifference):
+                self.difference_started.set()
+                await self.release_difference.wait()
+                return raw.types.updates.ChannelDifference(
+                    final=True,
+                    pts=2,
+                    new_messages=[],
+                    other_updates=[],
+                    chats=[],
+                    users=[
+                        raw.types.User(
+                            id=7,
+                            access_hash=70,
+                            first_name="Complete",
+                            username="complete_user",
+                        )
+                    ],
+                ).write()
+            return await super().invoke_raw(
+                session_peer_id,
+                body,
+                dc_id=dc_id,
+                tl_layer=tl_layer,
+                timeout=timeout,
+            )
+
+    gateway = DifferenceGateway()
+    app = Telefeeds(
+        "token",
+        gateway=gateway,
+        peer_refresh_concurrency=1,
+        peer_refresh_interval=0,
+    )
+    received_usernames: list[str | None] = []
+    first_handled = asyncio.Event()
+    second_handled = asyncio.Event()
+
+    @app.on_raw_update()
+    async def handle(client: Client, update, users, chats) -> None:
+        received_usernames.append(users[7].username)
+        if len(received_usernames) == 1:
+            first_handled.set()
+        else:
+            second_handled.set()
+
+    await app.start_async()
+    channel = raw.types.Channel(
+        id=123,
+        title="Channel",
+        photo=raw.types.ChatPhotoEmpty(),
+        date=1,
+        megagroup=True,
+        access_hash=1230,
+    )
+    for message_id, pts in ((10, 2), (11, 3)):
+        updates = raw.types.Updates(
+            updates=[
+                raw.types.UpdateNewChannelMessage(
+                    message=raw.types.Message(
+                        id=message_id,
+                        peer_id=raw.types.PeerChannel(channel_id=123),
+                        from_id=raw.types.PeerUser(user_id=7),
+                        date=1,
+                        message="message",
+                    ),
+                    pts=pts,
+                    pts_count=1,
+                )
+            ],
+            users=[raw.types.User(id=7, min=True, first_name="Min")],
+            chats=[channel],
+            date=1,
+            seq=pts,
+        )
+        await gateway.subscription_events.put(
+            UpdateEnvelope(
+                session_peer_id=100,
+                session_kind="user",
+                body=updates.write(),
+                received_at=None,
+                tl_layer=raw.all.layer,
+            )
+        )
+        if message_id == 10:
+            await asyncio.wait_for(first_handled.wait(), 1)
+            await asyncio.wait_for(gateway.difference_started.wait(), 1)
+            assert received_usernames == [None]
+            gateway.release_difference.set()
+            for attempt in range(100):
+                cached = app.peer_cache.get(("user", 100, "user", 7))
+                if cached is not None:
+                    break
+                await asyncio.sleep(0.001)
+            assert attempt < 99
+
+    await asyncio.wait_for(second_handled.wait(), 1)
+    assert received_usernames == [None, "complete_user"]
+    assert not any(
+        isinstance(request, raw.functions.updates.GetChannelDifference)
+        for session_peer_id, request, dc_id in gateway.requests
+    )
     await app.stop_async()
 
 

@@ -41,6 +41,10 @@ class TelefeedsClientMixin:
     async def invoke(self, query: Any, *args: Any, **kwargs: Any) -> Any:
         return await super().invoke(query, *args, **kwargs)
 
+    async def fetch_peers(self, peers: list[raw.base.User | raw.base.Chat]) -> bool:
+        await super().fetch_peers(peers)
+        return False
+
     async def get_session(
         self,
         dc_id: int | None = None,
