@@ -5,11 +5,14 @@ from ._core import (
     AuthorizationKind,
     AuthorizationResult,
     AuthorizationState,
+    GatewayError,
+    GatewayErrorCode,
     GatewayInvokeError,
     SessionRegistration,
     SessionSnapshot,
     SubscriptionReplacedError,
     TelefeedsClient,
+    TelefeedsError,
     TelegramRPCError,
     UpdateEnvelope,
 )
@@ -21,13 +24,16 @@ __all__ = [
     "AuthorizationKind",
     "AuthorizationResult",
     "AuthorizationState",
+    "GatewayError",
+    "GatewayErrorCode",
     "GatewayInvokeError",
     "SessionRegistration",
     "SessionSnapshot",
     "SubscriptionReplacedError",
     "TelefeedsClient",
+    "TelefeedsError",
     "TelegramRPCError",
     "UpdateEnvelope",
 ]
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"

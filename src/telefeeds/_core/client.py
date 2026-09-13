@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import AsyncIterator, Sequence
+from collections.abc import AsyncIterator, Awaitable, Sequence
 from datetime import timezone
+from typing import TypeVar
 
 import grpc
 from typing_extensions import Self
@@ -10,7 +11,7 @@ from typing_extensions import Self
 from telefeeds._generated import telefeeds_gateway_v1_pb2 as gateway
 from telefeeds._generated import telefeeds_gateway_v1_pb2_grpc as gateway_grpc
 
-from .errors import GatewayInvokeError, TelegramRPCError
+from .errors import GatewayError, GatewayErrorCode, GatewayInvokeError, TelegramRPCError
 from .models import (
     AuthorizationChallenge,
     AuthorizationCodeProvider,
@@ -22,6 +23,22 @@ from .models import (
     SessionSnapshot,
     UpdateEnvelope,
 )
+
+ResponseType = TypeVar("ResponseType")
+
+
+def gateway_error(error: grpc.aio.AioRpcError) -> GatewayError:
+    return GatewayError(
+        code=GatewayErrorCode(error.code().name),
+        details=error.details() or "",
+    )
+
+
+async def rpc_result(call: Awaitable[ResponseType]) -> ResponseType:
+    try:
+        return await call
+    except grpc.aio.AioRpcError as error:
+        raise gateway_error(error) from error
 
 
 class TelefeedsClient:
@@ -79,6 +96,9 @@ class TelefeedsClient:
                 await ready
             else:
                 await asyncio.wait_for(ready, timeout)
+        except grpc.aio.AioRpcError as error:
+            await channel.close()
+            raise gateway_error(error) from error
         except BaseException:
             await channel.close()
             raise
@@ -116,21 +136,24 @@ class TelefeedsClient:
             request.interface = interface
         if close_other is not None:
             request.close_other = close_other
-        call = self.require_stub().Subscribe(request, metadata=self.metadata)
-        await call.initial_metadata()
-        async for event in call:
-            received_at = (
-                event.received_at.ToDatetime(tzinfo=timezone.utc)
-                if event.HasField("received_at")
-                else None
-            )
-            yield UpdateEnvelope(
-                session_peer_id=event.session_peer_id,
-                session_kind=event.session_kind,
-                body=event.body,
-                received_at=received_at,
-                tl_layer=event.tl_layer,
-            )
+        try:
+            call = self.require_stub().Subscribe(request, metadata=self.metadata)
+            await call.initial_metadata()
+            async for event in call:
+                received_at = (
+                    event.received_at.ToDatetime(tzinfo=timezone.utc)
+                    if event.HasField("received_at")
+                    else None
+                )
+                yield UpdateEnvelope(
+                    session_peer_id=event.session_peer_id,
+                    session_kind=event.session_kind,
+                    body=event.body,
+                    received_at=received_at,
+                    tl_layer=event.tl_layer,
+                )
+        except grpc.aio.AioRpcError as error:
+            raise gateway_error(error) from error
 
     async def invoke_raw(
         self,
@@ -148,10 +171,12 @@ class TelefeedsClient:
         )
         if dc_id is not None:
             request.dc_id = dc_id
-        response = await self.require_stub().Invoke(
-            request,
-            metadata=self.metadata,
-            timeout=self.default_timeout if timeout is None else timeout,
+        response = await rpc_result(
+            self.require_stub().Invoke(
+                request,
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
         )
         if response.HasField("rpc_error"):
             error = response.rpc_error
@@ -171,10 +196,12 @@ class TelefeedsClient:
         *,
         timeout: float | None = None,
     ) -> list[SessionSnapshot]:
-        response = await self.require_stub().GetSessionSnapshots(
-            gateway.GetSessionSnapshotsRequest(session_peer_ids=session_peer_ids),
-            metadata=self.metadata,
-            timeout=self.default_timeout if timeout is None else timeout,
+        response = await rpc_result(
+            self.require_stub().GetSessionSnapshots(
+                gateway.GetSessionSnapshotsRequest(session_peer_ids=session_peer_ids),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
         )
         return [
             SessionSnapshot(
@@ -203,6 +230,12 @@ class TelefeedsClient:
                 media_requests_total=session.media_requests_total,
                 media_requests_in_flight=session.media_requests_in_flight,
                 tl_layer=session.tl_layer if session.HasField("tl_layer") else None,
+                usage_days=session.usage_days,
+                last_usage_at=(
+                    session.last_usage_at.ToDatetime(tzinfo=timezone.utc)
+                    if session.HasField("last_usage_at")
+                    else None
+                ),
             )
             for session in response.sessions
         ]
@@ -213,10 +246,12 @@ class TelefeedsClient:
         *,
         timeout: float | None = None,
     ) -> AuthorizationChallenge:
-        response = await self.require_stub().BeginPhoneAuthorization(
-            gateway.BeginPhoneAuthorizationRequest(phone_number=phone_number),
-            metadata=self.metadata,
-            timeout=self.default_timeout if timeout is None else timeout,
+        response = await rpc_result(
+            self.require_stub().BeginPhoneAuthorization(
+                gateway.BeginPhoneAuthorizationRequest(phone_number=phone_number),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
         )
         return AuthorizationChallenge(
             authorization_id=response.authorization_id,
@@ -251,12 +286,14 @@ class TelefeedsClient:
         *,
         timeout: float | None = None,
     ) -> AuthorizationChallenge:
-        response = await self.require_stub().BeginExistingSessionAuthorization(
-            gateway.BeginExistingSessionAuthorizationRequest(
-                session_peer_id=session_peer_id
-            ),
-            metadata=self.metadata,
-            timeout=self.default_timeout if timeout is None else timeout,
+        response = await rpc_result(
+            self.require_stub().BeginExistingSessionAuthorization(
+                gateway.BeginExistingSessionAuthorizationRequest(
+                    session_peer_id=session_peer_id
+                ),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
         )
         return AuthorizationChallenge(
             authorization_id=response.authorization_id,
@@ -286,13 +323,15 @@ class TelefeedsClient:
         *,
         timeout: float | None = None,
     ) -> SessionRegistration:
-        response = await self.require_stub().CompleteExistingSessionAuthorization(
-            gateway.CompleteExistingSessionAuthorizationRequest(
-                authorization_id=authorization_id,
-                code=code,
-            ),
-            metadata=self.metadata,
-            timeout=self.default_timeout if timeout is None else timeout,
+        response = await rpc_result(
+            self.require_stub().CompleteExistingSessionAuthorization(
+                gateway.CompleteExistingSessionAuthorizationRequest(
+                    authorization_id=authorization_id,
+                    code=code,
+                ),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
         )
         return SessionRegistration(
             session_peer_id=response.session.session_peer_id,
@@ -306,13 +345,15 @@ class TelefeedsClient:
         *,
         timeout: float | None = None,
     ) -> AuthorizationResult:
-        response = await self.require_stub().CompletePhoneAuthorization(
-            gateway.CompletePhoneAuthorizationRequest(
-                authorization_id=authorization_id,
-                code=code,
-            ),
-            metadata=self.metadata,
-            timeout=self.default_timeout if timeout is None else timeout,
+        response = await rpc_result(
+            self.require_stub().CompletePhoneAuthorization(
+                gateway.CompletePhoneAuthorizationRequest(
+                    authorization_id=authorization_id,
+                    code=code,
+                ),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
         )
         session = (
             SessionRegistration(
@@ -337,13 +378,15 @@ class TelefeedsClient:
         *,
         timeout: float | None = None,
     ) -> SessionRegistration:
-        response = await self.require_stub().CompletePasswordAuthorization(
-            gateway.CompletePasswordAuthorizationRequest(
-                authorization_id=authorization_id,
-                password=password,
-            ),
-            metadata=self.metadata,
-            timeout=self.default_timeout if timeout is None else timeout,
+        response = await rpc_result(
+            self.require_stub().CompletePasswordAuthorization(
+                gateway.CompletePasswordAuthorizationRequest(
+                    authorization_id=authorization_id,
+                    password=password,
+                ),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
         )
         return SessionRegistration(
             session_peer_id=response.session.session_peer_id,

@@ -4,14 +4,18 @@ import asyncio
 from io import BytesIO
 from types import SimpleNamespace
 
-import grpc
 import pytest
 from pyrogram import Client, raw
 from pyrogram.errors import FilePartMissing
 from pyrogram.file_id import FileType
 from pyrogram.raw.core import BoolTrue, TLObject
 
-from telefeeds import SubscriptionReplacedError, TelegramRPCError
+from telefeeds import (
+    GatewayError,
+    GatewayErrorCode,
+    SubscriptionReplacedError,
+    TelegramRPCError,
+)
 from telefeeds.pyrogram import Router, Telefeeds
 
 
@@ -117,7 +121,7 @@ async def test_start_retries_until_server_is_available() -> None:
 async def test_update_stream_reconnects_after_unavailable() -> None:
     gateway = FakeGateway()
     await gateway.subscription_events.put(
-        grpc.aio.AioRpcError(grpc.StatusCode.UNAVAILABLE)
+        GatewayError(GatewayErrorCode.UNAVAILABLE, "temporarily unavailable")
     )
     app = Telefeeds(
         "token",
@@ -141,9 +145,9 @@ async def test_update_stream_reconnects_after_unavailable() -> None:
 async def test_close_other_revocation_is_not_reconnected() -> None:
     gateway = FakeGateway()
     await gateway.subscription_events.put(
-        grpc.aio.AioRpcError(
-            grpc.StatusCode.CANCELLED,
-            details="channel was replaced by close_other",
+        GatewayError(
+            GatewayErrorCode.CANCELLED,
+            "channel was replaced by close_other",
         )
     )
     app = Telefeeds(

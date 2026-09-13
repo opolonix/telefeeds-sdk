@@ -79,6 +79,8 @@ message SessionSnapshot {
   uint64 media_requests_total = 17;
   uint64 media_requests_in_flight = 18;
   optional int32 tl_layer = 19;
+  uint64 usage_days = 20;
+  optional google.protobuf.Timestamp last_usage_at = 21;
 }
 
 enum AuthorizationKind {

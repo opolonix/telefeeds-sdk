@@ -4,12 +4,16 @@ import asyncio
 from io import BytesIO
 from typing import Any
 
-import grpc
 from pyrogram import raw
 from pyrogram.errors import RPCError
 from pyrogram.raw.core import TLObject
 
-from telefeeds._core import TelefeedsClient, TelegramRPCError
+from telefeeds._core import (
+    GatewayError,
+    GatewayErrorCode,
+    TelefeedsClient,
+    TelegramRPCError,
+)
 
 
 class GrpcSession:
@@ -70,10 +74,10 @@ class GrpcSession:
         retry_delay: float = 0.5,
     ) -> Any:
         retryable = {
-            grpc.StatusCode.ABORTED,
-            grpc.StatusCode.DEADLINE_EXCEEDED,
-            grpc.StatusCode.RESOURCE_EXHAUSTED,
-            grpc.StatusCode.UNAVAILABLE,
+            GatewayErrorCode.ABORTED,
+            GatewayErrorCode.DEADLINE_EXCEEDED,
+            GatewayErrorCode.RESOURCE_EXHAUSTED,
+            GatewayErrorCode.UNAVAILABLE,
         }
         active_dc_id = dc_id
         for attempt in range(retries + 1):
@@ -120,8 +124,8 @@ class GrpcSession:
                 )
                 RPCError.raise_it(rpc_error, type(query))
                 raise AssertionError("RPCError.raise_it must raise")
-            except grpc.aio.AioRpcError as error:
-                if error.code() not in retryable or attempt == retries:
+            except GatewayError as error:
+                if error.code not in retryable or attempt == retries:
                     raise
                 self.owner.media_stats.retries += 1
                 await asyncio.sleep(retry_delay * (2**attempt))

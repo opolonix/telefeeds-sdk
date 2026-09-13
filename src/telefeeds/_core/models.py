@@ -35,6 +35,8 @@ class SessionSnapshot:
     media_requests_total: int
     media_requests_in_flight: int
     tl_layer: int | None
+    usage_days: int
+    last_usage_at: datetime | None
 
 
 @dataclass(frozen=True, slots=True)

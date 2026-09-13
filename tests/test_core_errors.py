@@ -1,4 +1,7 @@
-from telefeeds import TelegramRPCError
+import grpc
+
+from telefeeds import GatewayError, GatewayErrorCode, TelefeedsError, TelegramRPCError
+from telefeeds._core.client import gateway_error
 
 
 def test_rpc_error_message_preserves_parameter_position() -> None:
@@ -9,3 +12,17 @@ def test_rpc_error_message_preserves_parameter_position() -> None:
     assert (
         TelegramRPCError(500, "INTERDC_CALL_ERROR", 2).message == "INTERDC_2_CALL_ERROR"
     )
+
+
+def test_gateway_error_does_not_expose_grpc_types() -> None:
+    error = gateway_error(
+        grpc.aio.AioRpcError(
+            grpc.StatusCode.INVALID_ARGUMENT,
+            details="code is invalid",
+        )
+    )
+
+    assert isinstance(error, GatewayError)
+    assert isinstance(error, TelefeedsError)
+    assert error.code == GatewayErrorCode.INVALID_ARGUMENT
+    assert error.details == "code is invalid"

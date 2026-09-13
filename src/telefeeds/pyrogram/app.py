@@ -5,13 +5,17 @@ import logging
 from io import BytesIO
 from typing import Any
 
-import grpc
 import pyrogram
 from pyrogram import handlers
 from pyrogram.raw.core import TLObject
 from typing_extensions import Self
 
-from telefeeds._core import SubscriptionReplacedError, TelefeedsClient
+from telefeeds._core import (
+    GatewayError,
+    GatewayErrorCode,
+    SubscriptionReplacedError,
+    TelefeedsClient,
+)
 
 from .client import MediaStats, TelefeedsClientMixin
 from .registrar import HandlerRegistrar
@@ -20,12 +24,12 @@ from .session import GrpcSession
 log = logging.getLogger(__name__)
 
 RETRYABLE_SUBSCRIPTION_CODES = {
-    grpc.StatusCode.ABORTED,
-    grpc.StatusCode.DEADLINE_EXCEEDED,
-    grpc.StatusCode.INTERNAL,
-    grpc.StatusCode.RESOURCE_EXHAUSTED,
-    grpc.StatusCode.UNAVAILABLE,
-    grpc.StatusCode.UNKNOWN,
+    GatewayErrorCode.ABORTED,
+    GatewayErrorCode.DEADLINE_EXCEEDED,
+    GatewayErrorCode.INTERNAL,
+    GatewayErrorCode.RESOURCE_EXHAUSTED,
+    GatewayErrorCode.UNAVAILABLE,
+    GatewayErrorCode.UNKNOWN,
 }
 
 
@@ -122,23 +126,27 @@ class Telefeeds(HandlerRegistrar):
             try:
                 await self.gateway.open(timeout=self.connect_timeout)
                 break
-            except (TimeoutError, grpc.aio.AioRpcError) as error:
-                error_name = (
-                    error.code().name
-                    if isinstance(error, grpc.aio.AioRpcError)
-                    else type(error).__name__
-                )
+            except TimeoutError as error:
                 log.warning(
                     "Telefeeds server is unavailable during startup (%s); "
                     "reconnecting in %.1fs",
-                    error_name,
+                    type(error).__name__,
                     reconnect_delay,
                 )
-                await asyncio.sleep(reconnect_delay)
-                reconnect_delay = min(
-                    reconnect_delay * 2,
-                    self.reconnect_max_delay,
+            except GatewayError as error:
+                if error.code not in RETRYABLE_SUBSCRIPTION_CODES:
+                    raise
+                log.warning(
+                    "Telefeeds server is unavailable during startup (%s); "
+                    "reconnecting in %.1fs",
+                    error.code.value,
+                    reconnect_delay,
                 )
+            await asyncio.sleep(reconnect_delay)
+            reconnect_delay = min(
+                reconnect_delay * 2,
+                self.reconnect_max_delay,
+            )
         self.subscription_task = asyncio.create_task(
             self.consume_updates(),
             name="telefeeds-updates",
@@ -316,19 +324,19 @@ class Telefeeds(HandlerRegistrar):
                 )
             except asyncio.CancelledError:
                 raise
-            except grpc.aio.AioRpcError as error:
+            except GatewayError as error:
                 if (
-                    error.code() == grpc.StatusCode.CANCELLED
-                    and error.details() == "channel was replaced by close_other"
+                    error.code == GatewayErrorCode.CANCELLED
+                    and error.details == "channel was replaced by close_other"
                 ):
                     raise SubscriptionReplacedError(
                         "update subscription was replaced by a close_other connection"
                     ) from error
-                if error.code() not in RETRYABLE_SUBSCRIPTION_CODES:
+                if error.code not in RETRYABLE_SUBSCRIPTION_CODES:
                     raise
                 log.warning(
                     "Telefeeds update stream disconnected (%s); reconnecting in %.1fs",
-                    error.code().name,
+                    error.code.value,
                     reconnect_delay,
                 )
             await asyncio.sleep(reconnect_delay)
