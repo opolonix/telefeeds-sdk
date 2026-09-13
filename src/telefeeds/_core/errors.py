@@ -44,14 +44,21 @@ class AuthorizationErrorCode(str, Enum):
     PROVIDER_UNAVAILABLE = "AUTHORIZATION_ERROR_CODE_PROVIDER_UNAVAILABLE"
     PERMISSION_DENIED = "AUTHORIZATION_ERROR_CODE_PERMISSION_DENIED"
     RATE_LIMITED = "AUTHORIZATION_ERROR_CODE_RATE_LIMITED"
+    CONCURRENT_LIMIT = "AUTHORIZATION_ERROR_CODE_CONCURRENT_LIMIT"
 
 
 class GatewayError(TelefeedsError):
     """A structured ClientHub error independent of grpcio types."""
 
-    def __init__(self, code: GatewayErrorCode, details: str) -> None:
+    def __init__(
+        self,
+        code: GatewayErrorCode,
+        details: str,
+        retry_after: float | None = None,
+    ) -> None:
         self.code = code
         self.details = details
+        self.retry_after = retry_after
         super().__init__(f"[{code.value}] {details}".rstrip())
 
 
@@ -129,6 +136,14 @@ class AuthorizationRateLimitedError(AuthorizationError):
     reason = AuthorizationErrorCode.RATE_LIMITED
 
 
+class AuthorizationConcurrentLimitError(AuthorizationError):
+    reason = AuthorizationErrorCode.CONCURRENT_LIMIT
+
+
+class RateLimitExceededError(GatewayError):
+    """A ClientHub request or concurrency limit has been reached."""
+
+
 AUTHORIZATION_ERROR_TYPES: dict[str, type[AuthorizationError]] = {
     error_type.reason.value: error_type
     for error_type in (
@@ -149,7 +164,13 @@ AUTHORIZATION_ERROR_TYPES: dict[str, type[AuthorizationError]] = {
         AuthorizationProviderUnavailableError,
         AuthorizationPermissionDeniedError,
         AuthorizationRateLimitedError,
+        AuthorizationConcurrentLimitError,
     )
+}
+
+GATEWAY_ERROR_TYPES: dict[str, type[GatewayError]] = {
+    **AUTHORIZATION_ERROR_TYPES,
+    "RATE_LIMIT_ERROR_CODE_EXCEEDED": RateLimitExceededError,
 }
 
 

@@ -12,11 +12,15 @@ service TelegramGateway {
   rpc Subscribe(SubscribeRequest) returns (stream UpdateEnvelope);
   rpc Invoke(InvokeRequest) returns (InvokeResponse);
   rpc GetSessionSnapshots(GetSessionSnapshotsRequest) returns (GetSessionSnapshotsResponse);
+  rpc GetSessionSubscription(GetSessionSubscriptionRequest) returns (SessionSubscription);
+  rpc SetSessionUpdatesEnabled(SetSessionUpdatesEnabledRequest) returns (SessionSubscription);
+  rpc ListUserSessions(ListUserSessionsRequest) returns (ListUserSessionsResponse);
   rpc BeginPhoneAuthorization(BeginPhoneAuthorizationRequest) returns (BeginPhoneAuthorizationResponse);
   rpc CompletePhoneAuthorization(CompletePhoneAuthorizationRequest) returns (CompletePhoneAuthorizationResponse);
   rpc CompletePasswordAuthorization(CompletePasswordAuthorizationRequest) returns (CompletePasswordAuthorizationResponse);
   rpc BeginExistingSessionAuthorization(BeginExistingSessionAuthorizationRequest) returns (BeginExistingSessionAuthorizationResponse);
   rpc CompleteExistingSessionAuthorization(CompleteExistingSessionAuthorizationRequest) returns (CompleteExistingSessionAuthorizationResponse);
+  rpc CancelAuthorization(CancelAuthorizationRequest) returns (CancelAuthorizationResponse);
 }
 
 message SubscribeRequest {
@@ -83,6 +87,49 @@ message SessionSnapshot {
   optional int32 tl_layer = 19;
   uint64 usage_days = 20;
   optional google.protobuf.Timestamp last_usage_at = 21;
+  bool updates_enabled = 22;
+  google.protobuf.Timestamp updates_state_changed_at = 23;
+}
+
+message GetSessionSubscriptionRequest {
+  int64 session_peer_id = 1;
+}
+
+message SetSessionUpdatesEnabledRequest {
+  int64 session_peer_id = 1;
+  bool enabled = 2;
+}
+
+message SessionSubscription {
+  int64 session_peer_id = 1;
+  bool updates_enabled = 2;
+  google.protobuf.Timestamp changed_at = 3;
+}
+
+message ListUserSessionsRequest {
+  // Default: 300. Maximum: 1000.
+  optional uint32 page_size = 1;
+  optional string page_token = 2;
+  optional bool updates_enabled = 3;
+}
+
+message ListUserSessionsResponse {
+  repeated IntegrationUserSession sessions = 1;
+  optional string next_page_token = 2;
+}
+
+message IntegrationUserSession {
+  int64 session_peer_id = 1;
+  optional string phone_number = 2;
+  optional string username = 3;
+  optional string first_name = 4;
+  optional string last_name = 5;
+  string state = 6;
+  bool updates_enabled = 7;
+  google.protobuf.Timestamp updates_state_changed_at = 8;
+  uint64 usage_days = 9;
+  optional google.protobuf.Timestamp last_usage_at = 10;
+  google.protobuf.Timestamp linked_at = 11;
 }
 
 enum AuthorizationKind {
@@ -112,6 +159,7 @@ enum AuthorizationErrorCode {
   AUTHORIZATION_ERROR_CODE_PROVIDER_UNAVAILABLE = 15;
   AUTHORIZATION_ERROR_CODE_PERMISSION_DENIED = 16;
   AUTHORIZATION_ERROR_CODE_RATE_LIMITED = 17;
+  AUTHORIZATION_ERROR_CODE_CONCURRENT_LIMIT = 18;
 }
 
 enum AuthorizationCodeProviderKind {
@@ -188,6 +236,12 @@ message CompletePasswordAuthorizationRequest {
 message CompletePasswordAuthorizationResponse {
   SessionRegistration session = 1;
 }
+
+message CancelAuthorizationRequest {
+  string authorization_id = 1;
+}
+
+message CancelAuthorizationResponse {}
 
 message SessionRegistration {
   int64 session_peer_id = 1;

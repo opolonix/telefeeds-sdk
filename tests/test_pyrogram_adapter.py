@@ -28,6 +28,7 @@ class FakeGateway:
         self.open_attempts = 0
         self.subscription_events: asyncio.Queue[object] = asyncio.Queue()
         self.subscription_attempts = 0
+        self.session_subscriptions: dict[int, bool] = {}
 
     async def open(self, *, timeout: float | None = None):
         self.open_attempts += 1
@@ -73,6 +74,25 @@ class FakeGateway:
             ).write()
         return BoolTrue()
 
+    async def get_session_subscription(self, session_peer_id: int):
+        return SimpleNamespace(
+            session_peer_id=session_peer_id,
+            updates_enabled=self.session_subscriptions.get(session_peer_id, True),
+        )
+
+    async def set_session_updates_enabled(self, session_peer_id: int, enabled: bool):
+        self.session_subscriptions[session_peer_id] = enabled
+        return SimpleNamespace(
+            session_peer_id=session_peer_id,
+            updates_enabled=enabled,
+        )
+
+    async def list_user_sessions(self, **options: object):
+        return options
+
+    async def cancel_authorization(self, authorization_id: str) -> None:
+        self.cancelled_authorization_id = authorization_id
+
 
 @pytest.mark.asyncio
 async def test_clients_are_isolated_and_use_selected_client() -> None:
@@ -91,6 +111,26 @@ async def test_clients_are_isolated_and_use_selected_client() -> None:
     assert second.session.session_peer_id == 200
 
     await app.stop_async()
+
+
+@pytest.mark.asyncio
+async def test_session_subscription_controls_use_gateway() -> None:
+    gateway = FakeGateway()
+    app = Telefeeds("token", gateway=gateway)
+
+    assert await app.is_session_subscribed(100)
+    paused = await app.unsubscribe_session(100)
+    assert paused.updates_enabled is False
+    assert not await app.is_session_subscribed(100)
+    resumed = await app.subscribe_session(100)
+    assert resumed.updates_enabled is True
+    assert await app.list_sessions(page_size=25, updates_enabled=True) == {
+        "page_size": 25,
+        "page_token": None,
+        "updates_enabled": True,
+    }
+    await app.cancel_authorization("attempt")
+    assert gateway.cancelled_authorization_id == "attempt"
 
 
 def test_tl_layer_uses_installed_schema_and_allows_override() -> None:

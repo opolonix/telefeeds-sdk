@@ -12,7 +12,7 @@ from telefeeds._generated import telefeeds_gateway_v1_pb2 as gateway
 from telefeeds._generated import telefeeds_gateway_v1_pb2_grpc as gateway_grpc
 
 from .errors import (
-    AUTHORIZATION_ERROR_TYPES,
+    GATEWAY_ERROR_TYPES,
     GatewayError,
     GatewayErrorCode,
     GatewayInvokeError,
@@ -25,9 +25,12 @@ from .models import (
     AuthorizationKind,
     AuthorizationResult,
     AuthorizationState,
+    IntegrationUserSession,
     SessionRegistration,
     SessionSnapshot,
+    SessionSubscription,
     UpdateEnvelope,
+    UserSessionPage,
 )
 
 ResponseType = TypeVar("ResponseType")
@@ -35,15 +38,21 @@ ResponseType = TypeVar("ResponseType")
 
 def gateway_error(error: grpc.aio.AioRpcError) -> GatewayError:
     error_type: type[GatewayError] = GatewayError
+    retry_after = None
     trailing_metadata = error.trailing_metadata()
     if trailing_metadata is not None:
         for key, value in trailing_metadata:
             if key == "telefeeds-error-code":
-                error_type = AUTHORIZATION_ERROR_TYPES.get(str(value), GatewayError)
-                break
+                error_type = GATEWAY_ERROR_TYPES.get(str(value), GatewayError)
+            elif key == "retry-after-ms":
+                try:
+                    retry_after = int(value) / 1_000
+                except (TypeError, ValueError):
+                    retry_after = None
     return error_type(
         code=GatewayErrorCode(error.code().name),
         details=error.details() or "",
+        retry_after=retry_after,
     )
 
 
@@ -249,9 +258,131 @@ class TelefeedsClient:
                     if session.HasField("last_usage_at")
                     else None
                 ),
+                updates_enabled=session.updates_enabled,
+                updates_state_changed_at=(
+                    session.updates_state_changed_at.ToDatetime(tzinfo=timezone.utc)
+                    if session.HasField("updates_state_changed_at")
+                    else None
+                ),
             )
             for session in response.sessions
         ]
+
+    async def get_session_subscription(
+        self,
+        session_peer_id: int,
+        *,
+        timeout: float | None = None,
+    ) -> SessionSubscription:
+        response = await rpc_result(
+            self.require_stub().GetSessionSubscription(
+                gateway.GetSessionSubscriptionRequest(session_peer_id=session_peer_id),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
+        )
+        return SessionSubscription(
+            session_peer_id=response.session_peer_id,
+            updates_enabled=response.updates_enabled,
+            changed_at=(
+                response.changed_at.ToDatetime(tzinfo=timezone.utc)
+                if response.HasField("changed_at")
+                else None
+            ),
+        )
+
+    async def set_session_updates_enabled(
+        self,
+        session_peer_id: int,
+        enabled: bool,
+        *,
+        timeout: float | None = None,
+    ) -> SessionSubscription:
+        response = await rpc_result(
+            self.require_stub().SetSessionUpdatesEnabled(
+                gateway.SetSessionUpdatesEnabledRequest(
+                    session_peer_id=session_peer_id,
+                    enabled=enabled,
+                ),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
+        )
+        return SessionSubscription(
+            session_peer_id=response.session_peer_id,
+            updates_enabled=response.updates_enabled,
+            changed_at=(
+                response.changed_at.ToDatetime(tzinfo=timezone.utc)
+                if response.HasField("changed_at")
+                else None
+            ),
+        )
+
+    async def list_user_sessions(
+        self,
+        *,
+        page_size: int = 300,
+        page_token: str | None = None,
+        updates_enabled: bool | None = None,
+        timeout: float | None = None,
+    ) -> UserSessionPage:
+        if not 1 <= page_size <= 1_000:
+            raise ValueError("page_size must be between 1 and 1000")
+        request = gateway.ListUserSessionsRequest(page_size=page_size)
+        if page_token is not None:
+            request.page_token = page_token
+        if updates_enabled is not None:
+            request.updates_enabled = updates_enabled
+        response = await rpc_result(
+            self.require_stub().ListUserSessions(
+                request,
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
+        )
+        return UserSessionPage(
+            sessions=tuple(
+                IntegrationUserSession(
+                    session_peer_id=session.session_peer_id,
+                    phone_number=session.phone_number
+                    if session.HasField("phone_number")
+                    else None,
+                    username=session.username if session.HasField("username") else None,
+                    first_name=session.first_name
+                    if session.HasField("first_name")
+                    else None,
+                    last_name=session.last_name
+                    if session.HasField("last_name")
+                    else None,
+                    state=session.state,
+                    updates_enabled=session.updates_enabled,
+                    updates_state_changed_at=(
+                        session.updates_state_changed_at.ToDatetime(
+                            tzinfo=timezone.utc
+                        )
+                        if session.HasField("updates_state_changed_at")
+                        else None
+                    ),
+                    usage_days=session.usage_days,
+                    last_usage_at=(
+                        session.last_usage_at.ToDatetime(tzinfo=timezone.utc)
+                        if session.HasField("last_usage_at")
+                        else None
+                    ),
+                    linked_at=(
+                        session.linked_at.ToDatetime(tzinfo=timezone.utc)
+                        if session.HasField("linked_at")
+                        else None
+                    ),
+                )
+                for session in response.sessions
+            ),
+            next_page_token=(
+                response.next_page_token
+                if response.HasField("next_page_token")
+                else None
+            ),
+        )
 
     async def begin_phone_authorization(
         self,
@@ -404,4 +535,20 @@ class TelefeedsClient:
         return SessionRegistration(
             session_peer_id=response.session.session_peer_id,
             state=response.session.state,
+        )
+
+    async def cancel_authorization(
+        self,
+        authorization_id: str,
+        *,
+        timeout: float | None = None,
+    ) -> None:
+        await rpc_result(
+            self.require_stub().CancelAuthorization(
+                gateway.CancelAuthorizationRequest(
+                    authorization_id=authorization_id,
+                ),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
         )

@@ -1,12 +1,14 @@
 import grpc
 
 from telefeeds import (
+    AuthorizationConcurrentLimitError,
     AuthorizationError,
     AuthorizationErrorCode,
     GatewayError,
     GatewayErrorCode,
     InvalidAuthorizationCodeError,
     InvalidAuthorizationPasswordError,
+    RateLimitExceededError,
     TelefeedsError,
     TelegramRPCError,
 )
@@ -68,3 +70,30 @@ def test_gateway_error_maps_authorization_machine_codes_to_specific_errors() -> 
     assert password_error.reason is AuthorizationErrorCode.PASSWORD_INVALID
     assert type(code_error) is InvalidAuthorizationCodeError
     assert code_error.reason is AuthorizationErrorCode.CODE_INVALID
+
+
+def test_gateway_error_maps_service_and_authorization_limits() -> None:
+    authorization_error = gateway_error(
+        grpc.aio.AioRpcError(
+            grpc.StatusCode.RESOURCE_EXHAUSTED,
+            trailing_metadata=grpc.aio.Metadata(
+                (
+                    "telefeeds-error-code",
+                    "AUTHORIZATION_ERROR_CODE_CONCURRENT_LIMIT",
+                )
+            ),
+            details="too many authorization attempts",
+        )
+    )
+    rate_error = gateway_error(
+        grpc.aio.AioRpcError(
+            grpc.StatusCode.RESOURCE_EXHAUSTED,
+            trailing_metadata=grpc.aio.Metadata(
+                ("telefeeds-error-code", "RATE_LIMIT_ERROR_CODE_EXCEEDED")
+            ),
+            details="request rate limit exceeded",
+        )
+    )
+
+    assert type(authorization_error) is AuthorizationConcurrentLimitError
+    assert type(rate_error) is RateLimitExceededError

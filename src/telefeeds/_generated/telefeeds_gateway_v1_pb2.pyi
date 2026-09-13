@@ -36,6 +36,7 @@ class AuthorizationErrorCode(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     AUTHORIZATION_ERROR_CODE_PROVIDER_UNAVAILABLE: _ClassVar[AuthorizationErrorCode]
     AUTHORIZATION_ERROR_CODE_PERMISSION_DENIED: _ClassVar[AuthorizationErrorCode]
     AUTHORIZATION_ERROR_CODE_RATE_LIMITED: _ClassVar[AuthorizationErrorCode]
+    AUTHORIZATION_ERROR_CODE_CONCURRENT_LIMIT: _ClassVar[AuthorizationErrorCode]
 
 class AuthorizationCodeProviderKind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
@@ -69,6 +70,7 @@ AUTHORIZATION_ERROR_CODE_SESSION_ACCESS_DISABLED: AuthorizationErrorCode
 AUTHORIZATION_ERROR_CODE_PROVIDER_UNAVAILABLE: AuthorizationErrorCode
 AUTHORIZATION_ERROR_CODE_PERMISSION_DENIED: AuthorizationErrorCode
 AUTHORIZATION_ERROR_CODE_RATE_LIMITED: AuthorizationErrorCode
+AUTHORIZATION_ERROR_CODE_CONCURRENT_LIMIT: AuthorizationErrorCode
 AUTHORIZATION_CODE_PROVIDER_KIND_UNSPECIFIED: AuthorizationCodeProviderKind
 AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_GATEWAY: AuthorizationCodeProviderKind
 AUTHORIZATION_CODE_PROVIDER_KIND_TELEGRAM_BOT: AuthorizationCodeProviderKind
@@ -147,7 +149,7 @@ class GetSessionSnapshotsResponse(_message.Message):
     def __init__(self, sessions: _Optional[_Iterable[_Union[SessionSnapshot, _Mapping]]] = ...) -> None: ...
 
 class SessionSnapshot(_message.Message):
-    __slots__ = ("session_peer_id", "state", "alive", "fatal", "proxy_broken", "uptime_ms", "updates_per_second", "invokes_per_second", "invokes_in_flight", "memory_bytes", "updates_total", "invokes_total", "last_error", "updated_at", "media_upload_bytes", "media_download_bytes", "media_requests_total", "media_requests_in_flight", "tl_layer", "usage_days", "last_usage_at")
+    __slots__ = ("session_peer_id", "state", "alive", "fatal", "proxy_broken", "uptime_ms", "updates_per_second", "invokes_per_second", "invokes_in_flight", "memory_bytes", "updates_total", "invokes_total", "last_error", "updated_at", "media_upload_bytes", "media_download_bytes", "media_requests_total", "media_requests_in_flight", "tl_layer", "usage_days", "last_usage_at", "updates_enabled", "updates_state_changed_at")
     SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
     STATE_FIELD_NUMBER: _ClassVar[int]
     ALIVE_FIELD_NUMBER: _ClassVar[int]
@@ -169,6 +171,8 @@ class SessionSnapshot(_message.Message):
     TL_LAYER_FIELD_NUMBER: _ClassVar[int]
     USAGE_DAYS_FIELD_NUMBER: _ClassVar[int]
     LAST_USAGE_AT_FIELD_NUMBER: _ClassVar[int]
+    UPDATES_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    UPDATES_STATE_CHANGED_AT_FIELD_NUMBER: _ClassVar[int]
     session_peer_id: int
     state: str
     alive: bool
@@ -190,7 +194,77 @@ class SessionSnapshot(_message.Message):
     tl_layer: int
     usage_days: int
     last_usage_at: _timestamp_pb2.Timestamp
-    def __init__(self, session_peer_id: _Optional[int] = ..., state: _Optional[str] = ..., alive: _Optional[bool] = ..., fatal: _Optional[bool] = ..., proxy_broken: _Optional[bool] = ..., uptime_ms: _Optional[int] = ..., updates_per_second: _Optional[float] = ..., invokes_per_second: _Optional[float] = ..., invokes_in_flight: _Optional[int] = ..., memory_bytes: _Optional[int] = ..., updates_total: _Optional[int] = ..., invokes_total: _Optional[int] = ..., last_error: _Optional[str] = ..., updated_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., media_upload_bytes: _Optional[int] = ..., media_download_bytes: _Optional[int] = ..., media_requests_total: _Optional[int] = ..., media_requests_in_flight: _Optional[int] = ..., tl_layer: _Optional[int] = ..., usage_days: _Optional[int] = ..., last_usage_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    updates_enabled: bool
+    updates_state_changed_at: _timestamp_pb2.Timestamp
+    def __init__(self, session_peer_id: _Optional[int] = ..., state: _Optional[str] = ..., alive: _Optional[bool] = ..., fatal: _Optional[bool] = ..., proxy_broken: _Optional[bool] = ..., uptime_ms: _Optional[int] = ..., updates_per_second: _Optional[float] = ..., invokes_per_second: _Optional[float] = ..., invokes_in_flight: _Optional[int] = ..., memory_bytes: _Optional[int] = ..., updates_total: _Optional[int] = ..., invokes_total: _Optional[int] = ..., last_error: _Optional[str] = ..., updated_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., media_upload_bytes: _Optional[int] = ..., media_download_bytes: _Optional[int] = ..., media_requests_total: _Optional[int] = ..., media_requests_in_flight: _Optional[int] = ..., tl_layer: _Optional[int] = ..., usage_days: _Optional[int] = ..., last_usage_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., updates_enabled: _Optional[bool] = ..., updates_state_changed_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+
+class GetSessionSubscriptionRequest(_message.Message):
+    __slots__ = ("session_peer_id",)
+    SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
+    session_peer_id: int
+    def __init__(self, session_peer_id: _Optional[int] = ...) -> None: ...
+
+class SetSessionUpdatesEnabledRequest(_message.Message):
+    __slots__ = ("session_peer_id", "enabled")
+    SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
+    ENABLED_FIELD_NUMBER: _ClassVar[int]
+    session_peer_id: int
+    enabled: bool
+    def __init__(self, session_peer_id: _Optional[int] = ..., enabled: _Optional[bool] = ...) -> None: ...
+
+class SessionSubscription(_message.Message):
+    __slots__ = ("session_peer_id", "updates_enabled", "changed_at")
+    SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
+    UPDATES_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    CHANGED_AT_FIELD_NUMBER: _ClassVar[int]
+    session_peer_id: int
+    updates_enabled: bool
+    changed_at: _timestamp_pb2.Timestamp
+    def __init__(self, session_peer_id: _Optional[int] = ..., updates_enabled: _Optional[bool] = ..., changed_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+
+class ListUserSessionsRequest(_message.Message):
+    __slots__ = ("page_size", "page_token", "updates_enabled")
+    PAGE_SIZE_FIELD_NUMBER: _ClassVar[int]
+    PAGE_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    UPDATES_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    page_size: int
+    page_token: str
+    updates_enabled: bool
+    def __init__(self, page_size: _Optional[int] = ..., page_token: _Optional[str] = ..., updates_enabled: _Optional[bool] = ...) -> None: ...
+
+class ListUserSessionsResponse(_message.Message):
+    __slots__ = ("sessions", "next_page_token")
+    SESSIONS_FIELD_NUMBER: _ClassVar[int]
+    NEXT_PAGE_TOKEN_FIELD_NUMBER: _ClassVar[int]
+    sessions: _containers.RepeatedCompositeFieldContainer[IntegrationUserSession]
+    next_page_token: str
+    def __init__(self, sessions: _Optional[_Iterable[_Union[IntegrationUserSession, _Mapping]]] = ..., next_page_token: _Optional[str] = ...) -> None: ...
+
+class IntegrationUserSession(_message.Message):
+    __slots__ = ("session_peer_id", "phone_number", "username", "first_name", "last_name", "state", "updates_enabled", "updates_state_changed_at", "usage_days", "last_usage_at", "linked_at")
+    SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
+    PHONE_NUMBER_FIELD_NUMBER: _ClassVar[int]
+    USERNAME_FIELD_NUMBER: _ClassVar[int]
+    FIRST_NAME_FIELD_NUMBER: _ClassVar[int]
+    LAST_NAME_FIELD_NUMBER: _ClassVar[int]
+    STATE_FIELD_NUMBER: _ClassVar[int]
+    UPDATES_ENABLED_FIELD_NUMBER: _ClassVar[int]
+    UPDATES_STATE_CHANGED_AT_FIELD_NUMBER: _ClassVar[int]
+    USAGE_DAYS_FIELD_NUMBER: _ClassVar[int]
+    LAST_USAGE_AT_FIELD_NUMBER: _ClassVar[int]
+    LINKED_AT_FIELD_NUMBER: _ClassVar[int]
+    session_peer_id: int
+    phone_number: str
+    username: str
+    first_name: str
+    last_name: str
+    state: str
+    updates_enabled: bool
+    updates_state_changed_at: _timestamp_pb2.Timestamp
+    usage_days: int
+    last_usage_at: _timestamp_pb2.Timestamp
+    linked_at: _timestamp_pb2.Timestamp
+    def __init__(self, session_peer_id: _Optional[int] = ..., phone_number: _Optional[str] = ..., username: _Optional[str] = ..., first_name: _Optional[str] = ..., last_name: _Optional[str] = ..., state: _Optional[str] = ..., updates_enabled: _Optional[bool] = ..., updates_state_changed_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., usage_days: _Optional[int] = ..., last_usage_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., linked_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
 
 class AuthorizationCodeProvider(_message.Message):
     __slots__ = ("kind", "url", "code_secret", "requires_open_url")
@@ -289,6 +363,16 @@ class CompletePasswordAuthorizationResponse(_message.Message):
     SESSION_FIELD_NUMBER: _ClassVar[int]
     session: SessionRegistration
     def __init__(self, session: _Optional[_Union[SessionRegistration, _Mapping]] = ...) -> None: ...
+
+class CancelAuthorizationRequest(_message.Message):
+    __slots__ = ("authorization_id",)
+    AUTHORIZATION_ID_FIELD_NUMBER: _ClassVar[int]
+    authorization_id: str
+    def __init__(self, authorization_id: _Optional[str] = ...) -> None: ...
+
+class CancelAuthorizationResponse(_message.Message):
+    __slots__ = ()
+    def __init__(self) -> None: ...
 
 class SessionRegistration(_message.Message):
     __slots__ = ("session_peer_id", "state")

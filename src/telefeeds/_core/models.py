@@ -37,6 +37,36 @@ class SessionSnapshot:
     tl_layer: int | None
     usage_days: int
     last_usage_at: datetime | None
+    updates_enabled: bool
+    updates_state_changed_at: datetime | None
+
+
+@dataclass(frozen=True, slots=True)
+class SessionSubscription:
+    session_peer_id: int
+    updates_enabled: bool
+    changed_at: datetime | None
+
+
+@dataclass(frozen=True, slots=True)
+class IntegrationUserSession:
+    session_peer_id: int
+    phone_number: str | None
+    username: str | None
+    first_name: str | None
+    last_name: str | None
+    state: str
+    updates_enabled: bool
+    updates_state_changed_at: datetime | None
+    usage_days: int
+    last_usage_at: datetime | None
+    linked_at: datetime | None
+
+
+@dataclass(frozen=True, slots=True)
+class UserSessionPage:
+    sessions: tuple[IntegrationUserSession, ...]
+    next_page_token: str | None
 
 
 @dataclass(frozen=True, slots=True)

@@ -46,6 +46,17 @@ app = Telefeeds(token="tfi_...", interface=7, close_other=True)
 
 При временной сетевой ошибке SDK переподключается без ограничения числа попыток. Задержка растёт от `reconnect_initial_delay=0.5` до `reconnect_max_delay=30.0` секунд. Явный отзыв через `close_other` не переподключает старый канал и поднимает `SubscriptionReplacedError`.
 
+Апдейты отдельной сессии можно остановить и вернуть без остановки самой сессии в Telefeeds:
+
+```python
+await app.unsubscribe_session(peer_id)
+assert not await app.is_session_subscribed(peer_id)
+
+await app.subscribe_session(peer_id)
+```
+
+Пауза действует сразу для всех каналов интеграции. Вызовы через эту сессию остаются доступны. День без активной подписки не начисляется, если интеграция не обращалась к сессии через `Invoke`.
+
 В асинхронном приложении:
 
 ```python
@@ -93,9 +104,21 @@ except AuthorizationAttemptExpiredError:
 
 Низкоуровневый `TelefeedsClient` предоставляет `subscribe()`, `invoke_raw()`, `get_session_snapshots()` и RPC регистрации. Он работает с protobuf-моделями и не требует Pyrogram.
 
+Дешёвый список связанных с интеграцией сессий читается из базы без обращения к Core:
+
+```python
+page = await app.list_sessions(page_size=300, updates_enabled=True)
+for session in page.sessions:
+    print(session.session_peer_id, session.state, session.usage_days)
+```
+
+Следующая страница запрашивается с `page_token=page.next_page_token`. Размер страницы — от 1 до 1000, по умолчанию 300.
+
 `SessionSnapshot.usage_days` содержит число UTC-дней использования сессии текущей интеграцией, а `last_usage_at` — начало последнего начисленного UTC-дня.
 
 Для будущей повторной привязки уже существующей сессии контракт содержит `begin_existing_session_authorization()` и `complete_existing_session_authorization()`. Ответ сообщает способ подтверждения через `authorization_kind` и `code_provider`: Telegram Gateway или Telegram-бот, ссылку для получения кода и необходимость её открыть. Провайдеры пока не включены, поэтому эти два RPC возвращают gRPC `UNIMPLEMENTED`.
+
+Одновременно интеграция может держать до трёх незавершённых авторизаций. Попытка автоматически закрывается через час или немедленно через `await app.cancel_authorization(authorization_id)`.
 
 ## Router и примеры
 

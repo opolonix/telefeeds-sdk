@@ -53,6 +53,21 @@ class TelegramGatewayStub:
                 request_serializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsRequest.SerializeToString,
                 response_deserializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsResponse.FromString,
                 _registered_method=True)
+        self.GetSessionSubscription = channel.unary_unary(
+                '/telefeeds.telegram.v1.TelegramGateway/GetSessionSubscription',
+                request_serializer=telefeeds__gateway__v1__pb2.GetSessionSubscriptionRequest.SerializeToString,
+                response_deserializer=telefeeds__gateway__v1__pb2.SessionSubscription.FromString,
+                _registered_method=True)
+        self.SetSessionUpdatesEnabled = channel.unary_unary(
+                '/telefeeds.telegram.v1.TelegramGateway/SetSessionUpdatesEnabled',
+                request_serializer=telefeeds__gateway__v1__pb2.SetSessionUpdatesEnabledRequest.SerializeToString,
+                response_deserializer=telefeeds__gateway__v1__pb2.SessionSubscription.FromString,
+                _registered_method=True)
+        self.ListUserSessions = channel.unary_unary(
+                '/telefeeds.telegram.v1.TelegramGateway/ListUserSessions',
+                request_serializer=telefeeds__gateway__v1__pb2.ListUserSessionsRequest.SerializeToString,
+                response_deserializer=telefeeds__gateway__v1__pb2.ListUserSessionsResponse.FromString,
+                _registered_method=True)
         self.BeginPhoneAuthorization = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/BeginPhoneAuthorization',
                 request_serializer=telefeeds__gateway__v1__pb2.BeginPhoneAuthorizationRequest.SerializeToString,
@@ -78,6 +93,11 @@ class TelegramGatewayStub:
                 request_serializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.SerializeToString,
                 response_deserializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.FromString,
                 _registered_method=True)
+        self.CancelAuthorization = channel.unary_unary(
+                '/telefeeds.telegram.v1.TelegramGateway/CancelAuthorization',
+                request_serializer=telefeeds__gateway__v1__pb2.CancelAuthorizationRequest.SerializeToString,
+                response_deserializer=telefeeds__gateway__v1__pb2.CancelAuthorizationResponse.FromString,
+                _registered_method=True)
 
 
 class TelegramGatewayServicer:
@@ -100,6 +120,24 @@ class TelegramGatewayServicer:
         raise NotImplementedError('Method not implemented!')
 
     def GetSessionSnapshots(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetSessionSubscription(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SetSessionUpdatesEnabled(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ListUserSessions(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -135,6 +173,12 @@ class TelegramGatewayServicer:
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def CancelAuthorization(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_TelegramGatewayServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -152,6 +196,21 @@ def add_TelegramGatewayServicer_to_server(servicer, server):
                     servicer.GetSessionSnapshots,
                     request_deserializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsRequest.FromString,
                     response_serializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsResponse.SerializeToString,
+            ),
+            'GetSessionSubscription': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSessionSubscription,
+                    request_deserializer=telefeeds__gateway__v1__pb2.GetSessionSubscriptionRequest.FromString,
+                    response_serializer=telefeeds__gateway__v1__pb2.SessionSubscription.SerializeToString,
+            ),
+            'SetSessionUpdatesEnabled': grpc.unary_unary_rpc_method_handler(
+                    servicer.SetSessionUpdatesEnabled,
+                    request_deserializer=telefeeds__gateway__v1__pb2.SetSessionUpdatesEnabledRequest.FromString,
+                    response_serializer=telefeeds__gateway__v1__pb2.SessionSubscription.SerializeToString,
+            ),
+            'ListUserSessions': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListUserSessions,
+                    request_deserializer=telefeeds__gateway__v1__pb2.ListUserSessionsRequest.FromString,
+                    response_serializer=telefeeds__gateway__v1__pb2.ListUserSessionsResponse.SerializeToString,
             ),
             'BeginPhoneAuthorization': grpc.unary_unary_rpc_method_handler(
                     servicer.BeginPhoneAuthorization,
@@ -177,6 +236,11 @@ def add_TelegramGatewayServicer_to_server(servicer, server):
                     servicer.CompleteExistingSessionAuthorization,
                     request_deserializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.FromString,
                     response_serializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.SerializeToString,
+            ),
+            'CancelAuthorization': grpc.unary_unary_rpc_method_handler(
+                    servicer.CancelAuthorization,
+                    request_deserializer=telefeeds__gateway__v1__pb2.CancelAuthorizationRequest.FromString,
+                    response_serializer=telefeeds__gateway__v1__pb2.CancelAuthorizationResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -264,6 +328,87 @@ class TelegramGateway:
             '/telefeeds.telegram.v1.TelegramGateway/GetSessionSnapshots',
             telefeeds__gateway__v1__pb2.GetSessionSnapshotsRequest.SerializeToString,
             telefeeds__gateway__v1__pb2.GetSessionSnapshotsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSessionSubscription(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/GetSessionSubscription',
+            telefeeds__gateway__v1__pb2.GetSessionSubscriptionRequest.SerializeToString,
+            telefeeds__gateway__v1__pb2.SessionSubscription.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SetSessionUpdatesEnabled(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/SetSessionUpdatesEnabled',
+            telefeeds__gateway__v1__pb2.SetSessionUpdatesEnabledRequest.SerializeToString,
+            telefeeds__gateway__v1__pb2.SessionSubscription.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListUserSessions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/ListUserSessions',
+            telefeeds__gateway__v1__pb2.ListUserSessionsRequest.SerializeToString,
+            telefeeds__gateway__v1__pb2.ListUserSessionsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -399,6 +544,33 @@ class TelegramGateway:
             '/telefeeds.telegram.v1.TelegramGateway/CompleteExistingSessionAuthorization',
             telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.SerializeToString,
             telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CancelAuthorization(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/CancelAuthorization',
+            telefeeds__gateway__v1__pb2.CancelAuthorizationRequest.SerializeToString,
+            telefeeds__gateway__v1__pb2.CancelAuthorizationResponse.FromString,
             options,
             channel_credentials,
             insecure,

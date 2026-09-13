@@ -11,10 +11,16 @@ from pyrogram.raw.core import TLObject
 from typing_extensions import Self
 
 from telefeeds._core import (
+    AuthorizationChallenge,
+    AuthorizationResult,
     GatewayError,
     GatewayErrorCode,
+    SessionRegistration,
+    SessionSnapshot,
+    SessionSubscription,
     SubscriptionReplacedError,
     TelefeedsClient,
+    UserSessionPage,
 )
 
 from .client import MediaStats, TelefeedsClientMixin
@@ -344,28 +350,65 @@ class Telefeeds(HandlerRegistrar):
 
     async def get_session_snapshots(
         self, session_peer_ids: list[int] | tuple[int, ...] = ()
-    ):
+    ) -> list[SessionSnapshot]:
         return await self.gateway.get_session_snapshots(session_peer_ids)
 
-    async def begin_phone_authorization(self, phone_number: str):
+    async def get_session_subscription(
+        self, session_peer_id: int
+    ) -> SessionSubscription:
+        return await self.gateway.get_session_subscription(session_peer_id)
+
+    async def is_session_subscribed(self, session_peer_id: int) -> bool:
+        subscription = await self.get_session_subscription(session_peer_id)
+        return subscription.updates_enabled
+
+    async def unsubscribe_session(self, session_peer_id: int) -> SessionSubscription:
+        return await self.gateway.set_session_updates_enabled(session_peer_id, False)
+
+    async def subscribe_session(self, session_peer_id: int) -> SessionSubscription:
+        return await self.gateway.set_session_updates_enabled(session_peer_id, True)
+
+    async def list_sessions(
+        self,
+        *,
+        page_size: int = 300,
+        page_token: str | None = None,
+        updates_enabled: bool | None = None,
+    ) -> UserSessionPage:
+        return await self.gateway.list_user_sessions(
+            page_size=page_size,
+            page_token=page_token,
+            updates_enabled=updates_enabled,
+        )
+
+    async def begin_phone_authorization(
+        self, phone_number: str
+    ) -> AuthorizationChallenge:
         return await self.gateway.begin_phone_authorization(phone_number)
 
-    async def begin_existing_session_authorization(self, session_peer_id: int):
+    async def begin_existing_session_authorization(
+        self, session_peer_id: int
+    ) -> AuthorizationChallenge:
         return await self.gateway.begin_existing_session_authorization(session_peer_id)
 
     async def complete_existing_session_authorization(
         self, authorization_id: str, code: str
-    ):
+    ) -> SessionRegistration:
         return await self.gateway.complete_existing_session_authorization(
             authorization_id, code
         )
 
-    async def complete_phone_authorization(self, authorization_id: str, code: str):
+    async def complete_phone_authorization(
+        self, authorization_id: str, code: str
+    ) -> AuthorizationResult:
         return await self.gateway.complete_phone_authorization(authorization_id, code)
 
     async def complete_password_authorization(
         self, authorization_id: str, password: str
-    ):
+    ) -> SessionRegistration:
         return await self.gateway.complete_password_authorization(
             authorization_id, password
         )
+
+    async def cancel_authorization(self, authorization_id: str) -> None:
+        await self.gateway.cancel_authorization(authorization_id)
