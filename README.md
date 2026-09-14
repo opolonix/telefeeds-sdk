@@ -88,6 +88,8 @@ await client.send_document("me", "archive.zip")
 path = await client.download_media(message)
 ```
 
+Загрузка файлов выполняется частями по 512 КиБ с `cdn_supported=False`, чтобы каждый ответ гарантированно помещался в MTProto-контейнер Bridge.
+
 Вне обработчика клиент можно получить явно:
 
 ```python

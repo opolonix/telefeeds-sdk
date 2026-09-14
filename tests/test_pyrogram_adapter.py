@@ -466,6 +466,7 @@ async def test_download_forces_cdn_off_and_routes_to_file_dc() -> None:
     assert session_peer_id == 100
     assert dc_id == 4
     assert request.cdn_supported is False
+    assert request.limit == 512 * 1024
     assert gateway.tl_layers[-1] == raw.all.layer
     await app.stop_async()
 

@@ -245,7 +245,7 @@ class TelefeedsClientMixin:
                     thumb_size=file_id.thumbnail_size,
                 )
 
-            chunk_size = 1024 * 1024
+            chunk_size = 512 * 1024
             offset_bytes = abs(offset) * chunk_size
             remaining = abs(limit) or (1 << 31) - 1
             current = 0
