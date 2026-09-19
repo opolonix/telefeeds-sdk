@@ -233,7 +233,6 @@ class TelefeedsClient:
                 state=session.state,
                 alive=session.alive,
                 fatal=session.fatal,
-                proxy_broken=session.proxy_broken,
                 uptime_ms=session.uptime_ms,
                 updates_per_second=session.updates_per_second,
                 invokes_per_second=session.invokes_per_second,

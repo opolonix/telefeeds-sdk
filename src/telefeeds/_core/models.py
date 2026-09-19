@@ -49,7 +49,6 @@ class SessionSnapshot:
     state: str
     alive: bool
     fatal: bool
-    proxy_broken: bool
     uptime_ms: int
     updates_per_second: float
     invokes_per_second: float

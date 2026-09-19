@@ -102,7 +102,6 @@ message SessionSnapshot {
   string state = 2;
   bool alive = 3;
   bool fatal = 4;
-  bool proxy_broken = 5;
   uint64 uptime_ms = 6;
   double updates_per_second = 7;
   double invokes_per_second = 8;

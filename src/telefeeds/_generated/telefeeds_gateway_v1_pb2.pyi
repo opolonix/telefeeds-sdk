@@ -203,12 +203,11 @@ class GetSessionSnapshotsResponse(_message.Message):
     def __init__(self, sessions: _Optional[_Iterable[_Union[SessionSnapshot, _Mapping]]] = ...) -> None: ...
 
 class SessionSnapshot(_message.Message):
-    __slots__ = ("session_peer_id", "state", "alive", "fatal", "proxy_broken", "uptime_ms", "updates_per_second", "invokes_per_second", "invokes_in_flight", "memory_bytes", "updates_total", "invokes_total", "last_error", "updated_at", "media_upload_bytes", "media_download_bytes", "media_requests_total", "media_requests_in_flight", "tl_layer", "usage_days", "last_usage_at", "updates_enabled", "updates_state_changed_at")
+    __slots__ = ("session_peer_id", "state", "alive", "fatal", "uptime_ms", "updates_per_second", "invokes_per_second", "invokes_in_flight", "memory_bytes", "updates_total", "invokes_total", "last_error", "updated_at", "media_upload_bytes", "media_download_bytes", "media_requests_total", "media_requests_in_flight", "tl_layer", "usage_days", "last_usage_at", "updates_enabled", "updates_state_changed_at")
     SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
     STATE_FIELD_NUMBER: _ClassVar[int]
     ALIVE_FIELD_NUMBER: _ClassVar[int]
     FATAL_FIELD_NUMBER: _ClassVar[int]
-    PROXY_BROKEN_FIELD_NUMBER: _ClassVar[int]
     UPTIME_MS_FIELD_NUMBER: _ClassVar[int]
     UPDATES_PER_SECOND_FIELD_NUMBER: _ClassVar[int]
     INVOKES_PER_SECOND_FIELD_NUMBER: _ClassVar[int]
@@ -231,7 +230,6 @@ class SessionSnapshot(_message.Message):
     state: str
     alive: bool
     fatal: bool
-    proxy_broken: bool
     uptime_ms: int
     updates_per_second: float
     invokes_per_second: float
@@ -250,7 +248,7 @@ class SessionSnapshot(_message.Message):
     last_usage_at: _timestamp_pb2.Timestamp
     updates_enabled: bool
     updates_state_changed_at: _timestamp_pb2.Timestamp
-    def __init__(self, session_peer_id: _Optional[int] = ..., state: _Optional[str] = ..., alive: _Optional[bool] = ..., fatal: _Optional[bool] = ..., proxy_broken: _Optional[bool] = ..., uptime_ms: _Optional[int] = ..., updates_per_second: _Optional[float] = ..., invokes_per_second: _Optional[float] = ..., invokes_in_flight: _Optional[int] = ..., memory_bytes: _Optional[int] = ..., updates_total: _Optional[int] = ..., invokes_total: _Optional[int] = ..., last_error: _Optional[str] = ..., updated_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., media_upload_bytes: _Optional[int] = ..., media_download_bytes: _Optional[int] = ..., media_requests_total: _Optional[int] = ..., media_requests_in_flight: _Optional[int] = ..., tl_layer: _Optional[int] = ..., usage_days: _Optional[int] = ..., last_usage_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., updates_enabled: _Optional[bool] = ..., updates_state_changed_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+    def __init__(self, session_peer_id: _Optional[int] = ..., state: _Optional[str] = ..., alive: _Optional[bool] = ..., fatal: _Optional[bool] = ..., uptime_ms: _Optional[int] = ..., updates_per_second: _Optional[float] = ..., invokes_per_second: _Optional[float] = ..., invokes_in_flight: _Optional[int] = ..., memory_bytes: _Optional[int] = ..., updates_total: _Optional[int] = ..., invokes_total: _Optional[int] = ..., last_error: _Optional[str] = ..., updated_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., media_upload_bytes: _Optional[int] = ..., media_download_bytes: _Optional[int] = ..., media_requests_total: _Optional[int] = ..., media_requests_in_flight: _Optional[int] = ..., tl_layer: _Optional[int] = ..., usage_days: _Optional[int] = ..., last_usage_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., updates_enabled: _Optional[bool] = ..., updates_state_changed_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
 
 class GetSessionSubscriptionRequest(_message.Message):
     __slots__ = ("session_peer_id",)
