@@ -22,6 +22,10 @@ from telefeeds.pyrogram import Router, Telefeeds
 
 class FakeGateway:
     def __init__(self) -> None:
+        from telefeeds.providers import ProviderRegistry
+        self.providers = ProviderRegistry()
+        self.make_set = self.providers.make_set
+        self.make_dataset = self.providers.make_dataset
         self.requests: list[tuple[int, object, int | None]] = []
         self.tl_layers: list[int] = []
         self.rpc_error: TelegramRPCError | None = None

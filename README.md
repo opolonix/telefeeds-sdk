@@ -15,7 +15,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from telefeeds.pyrogram import Telefeeds
 
-app = Telefeeds(token="tfi_...")
+app = Telefeeds(token="telefeeds_...")
 
 
 @app.on_message(filters.incoming & filters.text)
@@ -34,7 +34,7 @@ Kurigram иногда присылает в channel update сокращённы�
 
 ```python
 app = Telefeeds(
-    token="tfi_...",
+    token="telefeeds_...",
     peer_refresh_concurrency=4,
     peer_refresh_interval=300.0,
 )
@@ -45,7 +45,7 @@ app = Telefeeds(
 `tl_layer` автоматически берётся из `pyrogram.raw.all.layer`. ClientHub принимает слои 227–229:
 
 ```python
-app = Telefeeds(token="tfi_...", tl_layer=228)
+app = Telefeeds(token="telefeeds_...", tl_layer=228)
 ```
 
 ## Подписки и переподключение
@@ -53,7 +53,7 @@ app = Telefeeds(token="tfi_...", tl_layer=228)
 Параметры `interface` и `close_other` передаются при подписке:
 
 ```python
-app = Telefeeds(token="tfi_...", interface=7, close_other=True)
+app = Telefeeds(token="telefeeds_...", interface=7, close_other=True)
 ```
 
 Каналы одного `interface` делят апдейты между собой. Разные интерфейсы получают собственную копию каждого апдейта. `close_other=True` завершает уже открытые каналы этой интеграции и интерфейса.
@@ -74,7 +74,7 @@ await app.subscribe_session(peer_id)
 В асинхронном приложении:
 
 ```python
-async with Telefeeds(token="tfi_...") as app:
+async with Telefeeds(token="telefeeds_...") as app:
     await app.subscription_task
 ```
 
@@ -157,7 +157,7 @@ for session in page.sessions:
 
 ```bash
 pip install telefeeds-sdk kurigram aiogram
-export TELEFEEDS_TOKEN='tfi_...'
+export TELEFEEDS_TOKEN='telefeeds_...'
 export TELEGRAM_BOT_TOKEN='123456:...'
 python examples/pyrogram_and_aiogram.py
 ```
@@ -165,7 +165,7 @@ python examples/pyrogram_and_aiogram.py
 Для регистрации интеграции должен быть разрешён доступ к пользовательским сессиям:
 
 ```bash
-export TELEFEEDS_TOKEN='tfi_...'
+export TELEFEEDS_TOKEN='telefeeds_...'
 python examples/register_account.py
 ```
 
@@ -179,3 +179,60 @@ twine check dist/*
 ```
 
 Публикация релиза запускается GitHub Actions после создания GitHub Release. Для неё нужен Trusted Publisher проекта `telefeeds-sdk` в PyPI.
+# Наборы аудитории и CSV-выгрузки (SDK 0.3.0)
+
+Зарегистрируйте обработчики до запуска клиента. Интеграцию нужно связать с ботом
+в интерфейсе Telefeeds. Каталог запрашивается один раз на логический `interface`,
+а не на каждое соединение. Ответы разных интерфейсов появляются независимо.
+`client.gateway.providers.ttl = 600` задаёт срок кэша каталога (0–3600 секунд).
+
+```python
+from pydantic import BaseModel, Field
+from telefeeds import BackStream
+from telefeeds.pyrogram import Telefeeds
+
+client = Telefeeds("YOUR_INTEGRATION_TOKEN", interface=1)
+
+async def count_active(bot_id: int):
+    return await repository.count_active(bot_id)
+
+@client.make_set("active_clients", title="Активные пользователи",
+                 summary="Пользователи, активные в сервисе", count_call=count_active)
+async def active_clients(bot_id: int, stream: BackStream):
+    async for user in repository.active_clients(bot_id):
+        await stream.push(user_id=user.telegram_id,
+                          username=user.username, lang_code=user.lang_code)
+
+class ClientRow(BaseModel):
+    name: str = Field(title="Имя пользователя")
+
+async def revision(bot_id: int):
+    return await repository.dataset_revision(bot_id)
+
+@client.make_dataset("clients", title="Клиенты", headers=ClientRow,
+                     revision_call=revision)
+async def clients(bot_id: int, stream: BackStream, offset: int = 0):
+    async for index, user in repository.clients_at_offset(bot_id, offset):
+        await stream.push(ClientRow(name=user.name), offset=index)
+```
+
+`repository` — ваш источник данных. `username` и `lang_code` необязательны.
+`await stream.push` обязателен: он обеспечивает обратное давление, не накапливая
+всё множество в памяти. Пакет содержит до 500 строк и примерно 240 КБ;
+шлюз принимает не более 256 КиБ JSON за пакет. Следующий пакет разрешается
+после передачи предыдущего потребителю. Таймаут отсутствия ответа — 30 секунд,
+общая продолжительность выгрузки — не более часа. `count_call` ожидается до
+двух секунд, ошибка счётчика не скрывает сам набор.
+
+Возобновление CSV требует стабильного порядка, непрерывных нулевых offsets и
+`revision_call`, возвращающего неизменную версию данных. Изменившаяся версия
+запрещает продолжение. Состояние живёт в Redis час; строки и CSV в Telefeeds
+не сохраняются. Браузер скачивает оставшуюся часть отдельным CSV с заголовками;
+для цельного файла нужно начать загрузку заново. Смещение означает переданные
+сервером строки, а не подтверждение записи файла браузером.
+
+Для обычного доступа к Telegram бот использует тот же SDK (`Invoke` и апдейты),
+но разрешения «Присылать апдейты» и «Разрешить взаимодействие с API» включаются
+отдельно на связи интеграция—бот. По умолчанию оба выключены. Каталоги не
+включают эти разрешения автоматически. Прямое MTProto-соединение поддерживает
+сервер Telefeeds; SDK подключается к gRPC.

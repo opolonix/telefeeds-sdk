@@ -90,6 +90,11 @@ class TelefeedsClient:
         self.max_message_bytes = max_message_bytes
         self.channel: grpc.aio.Channel | None = None
         self.stub: gateway_grpc.TelegramGatewayStub | None = None
+        from telefeeds.providers import ProviderRegistry
+        self.providers = ProviderRegistry()
+        self.provider_task: asyncio.Task | None = None
+        self.make_set = self.providers.make_set
+        self.make_dataset = self.providers.make_dataset
 
     @property
     def metadata(self) -> tuple[tuple[str, str], ...]:
@@ -128,9 +133,15 @@ class TelefeedsClient:
             raise
         self.channel = channel
         self.stub = gateway_grpc.TelegramGatewayStub(channel)
+        if self.providers.sets or self.providers.datasets:
+            self.provider_task = asyncio.create_task(self.providers.serve(channel, self.metadata))
         return self
 
     async def close(self) -> None:
+        if self.provider_task is not None:
+            self.provider_task.cancel()
+            await asyncio.gather(self.provider_task, return_exceptions=True)
+            self.provider_task = None
         if self.channel is None:
             return
         await self.channel.close()

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "telefeeds-sdk"
-version = "0.2.9"
+version = "0.3.0"
 description = "Async Python SDK and Pyrogram-compatible client for Telefeeds"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,6 +27,7 @@ classifiers = [
   "Topic :: Communications :: Chat",
 ]
 dependencies = [
+  "pydantic>=2.10,<3",
   "grpcio>=1.83.1,<2",
   "protobuf>=7.36.1,<8",
   "typing-extensions>=4.4",

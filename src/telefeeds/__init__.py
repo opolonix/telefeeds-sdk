@@ -44,6 +44,7 @@ from ._core import (
 )
 
 __all__ = [
+    "BackStream",
     "AuthorizationAttemptExpiredError",
     "AuthorizationAttemptForbiddenError",
     "AuthorizationAttemptNotFoundError",
@@ -88,4 +89,6 @@ __all__ = [
     "UserSessionPage",
 ]
 
-__version__ = "0.2.9"
+from .providers import BackStream
+
+__version__ = "0.3.0"

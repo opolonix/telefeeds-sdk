@@ -132,6 +132,9 @@ class Telefeeds(HandlerRegistrar):
             (TelefeedsClientMixin, default_client),
             {"__module__": default_client.__module__},
         )
+        self.gateway.providers.interface_id = interface or 0
+        self.make_set = self.gateway.make_set
+        self.make_dataset = self.gateway.make_dataset
         self.clients: dict[tuple[str, int], pyrogram.Client] = {}
         self.client_initializers: dict[
             tuple[str, int], asyncio.Task[pyrogram.Client]
