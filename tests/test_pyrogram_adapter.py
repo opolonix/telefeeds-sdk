@@ -20,6 +20,21 @@ from telefeeds import (
 from telefeeds.pyrogram import Router, Telefeeds
 
 
+@pytest.mark.asyncio
+async def test_update_only_bot_initializes_without_tl_permission():
+    gateway = FakeGateway()
+    gateway.rpc_error = GatewayError(GatewayErrorCode.PERMISSION_DENIED, "bot API disabled")
+    app = Telefeeds("token", gateway=gateway)
+    try:
+        client = await app.get_client(12345, "bot")
+        assert client.me.id == 12345
+        assert client.me.is_bot is True
+        with pytest.raises(GatewayError):
+            await client.get_me()
+    finally:
+        await app.stop_async()
+
+
 class FakeGateway:
     def __init__(self) -> None:
         from telefeeds.providers import ProviderRegistry

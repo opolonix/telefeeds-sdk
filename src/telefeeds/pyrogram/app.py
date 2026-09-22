@@ -347,7 +347,14 @@ class Telefeeds(HandlerRegistrar):
         client.is_connected = True
         client.is_initialized = True
         try:
-            client.me = await client.get_me()
+            try:
+                client.me = await client.get_me()
+            except GatewayError as error:
+                if session_kind != "bot" or error.code != GatewayErrorCode.PERMISSION_DENIED:
+                    raise
+                # Update-only bot access must not require permission to invoke TL.
+                client.me = pyrogram.types.User(client=client, id=session_peer_id, is_self=True, is_bot=True)
+                log.info("Bot %s initialized for updates without API permission", session_peer_id)
         except BaseException:
             await client.storage.close()
             client.executor.shutdown(wait=False, cancel_futures=True)
