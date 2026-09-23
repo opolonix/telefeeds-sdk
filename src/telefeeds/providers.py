@@ -320,7 +320,12 @@ class ProviderRegistry:
             call = stub.Connect(frames(), metadata=metadata)
             try:
                 async for frame in call:
-                    if frame.kind == "request":
+                    if frame.kind == "ping":
+                        await outgoing.put(proto.ProviderFrame(
+                            kind="pong", request_id=frame.request_id,
+                            interface_id=self.interface_id,
+                        ))
+                    elif frame.kind == "request":
                         if len(tasks) >= 32:
                             await outgoing.put(
                                 proto.ProviderFrame(
