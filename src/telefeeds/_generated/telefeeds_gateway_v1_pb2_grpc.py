@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import telefeeds_gateway_v1_pb2 as telefeeds__gateway__v1__pb2
+from . import telefeeds_gateway_v1_pb2 as gateway__pb2
 
 GRPC_GENERATED_VERSION = '1.83.1'
 GRPC_VERSION = grpc.__version__
@@ -18,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in telefeeds_gateway_v1_pb2_grpc.py depends on'
+        + ' but the generated code in gateway_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -40,68 +40,78 @@ class TelegramGatewayStub:
         """
         self.Subscribe = channel.unary_stream(
                 '/telefeeds.telegram.v1.TelegramGateway/Subscribe',
-                request_serializer=telefeeds__gateway__v1__pb2.SubscribeRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.UpdateEnvelope.FromString,
+                request_serializer=gateway__pb2.SubscribeRequest.SerializeToString,
+                response_deserializer=gateway__pb2.UpdateEnvelope.FromString,
                 _registered_method=True)
         self.Invoke = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/Invoke',
-                request_serializer=telefeeds__gateway__v1__pb2.InvokeRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.InvokeResponse.FromString,
+                request_serializer=gateway__pb2.InvokeRequest.SerializeToString,
+                response_deserializer=gateway__pb2.InvokeResponse.FromString,
+                _registered_method=True)
+        self.UploadBotApiFile = channel.stream_unary(
+                '/telefeeds.telegram.v1.TelegramGateway/UploadBotApiFile',
+                request_serializer=gateway__pb2.BotApiFileChunk.SerializeToString,
+                response_deserializer=gateway__pb2.BotApiUploadedFile.FromString,
+                _registered_method=True)
+        self.DownloadBotApiFile = channel.unary_stream(
+                '/telefeeds.telegram.v1.TelegramGateway/DownloadBotApiFile',
+                request_serializer=gateway__pb2.BotApiFileRequest.SerializeToString,
+                response_deserializer=gateway__pb2.BotApiFileChunk.FromString,
                 _registered_method=True)
         self.GetIntegrationSnapshot = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/GetIntegrationSnapshot',
-                request_serializer=telefeeds__gateway__v1__pb2.GetIntegrationSnapshotRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.IntegrationSnapshot.FromString,
+                request_serializer=gateway__pb2.GetIntegrationSnapshotRequest.SerializeToString,
+                response_deserializer=gateway__pb2.IntegrationSnapshot.FromString,
                 _registered_method=True)
         self.GetSessionSnapshots = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/GetSessionSnapshots',
-                request_serializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsResponse.FromString,
+                request_serializer=gateway__pb2.GetSessionSnapshotsRequest.SerializeToString,
+                response_deserializer=gateway__pb2.GetSessionSnapshotsResponse.FromString,
                 _registered_method=True)
         self.GetSessionSubscription = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/GetSessionSubscription',
-                request_serializer=telefeeds__gateway__v1__pb2.GetSessionSubscriptionRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.SessionSubscription.FromString,
+                request_serializer=gateway__pb2.GetSessionSubscriptionRequest.SerializeToString,
+                response_deserializer=gateway__pb2.SessionSubscription.FromString,
                 _registered_method=True)
         self.SetSessionUpdatesEnabled = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/SetSessionUpdatesEnabled',
-                request_serializer=telefeeds__gateway__v1__pb2.SetSessionUpdatesEnabledRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.SessionSubscription.FromString,
+                request_serializer=gateway__pb2.SetSessionUpdatesEnabledRequest.SerializeToString,
+                response_deserializer=gateway__pb2.SessionSubscription.FromString,
                 _registered_method=True)
         self.ListUserSessions = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/ListUserSessions',
-                request_serializer=telefeeds__gateway__v1__pb2.ListUserSessionsRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.ListUserSessionsResponse.FromString,
+                request_serializer=gateway__pb2.ListUserSessionsRequest.SerializeToString,
+                response_deserializer=gateway__pb2.ListUserSessionsResponse.FromString,
                 _registered_method=True)
         self.BeginPhoneAuthorization = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/BeginPhoneAuthorization',
-                request_serializer=telefeeds__gateway__v1__pb2.BeginPhoneAuthorizationRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.BeginPhoneAuthorizationResponse.FromString,
+                request_serializer=gateway__pb2.BeginPhoneAuthorizationRequest.SerializeToString,
+                response_deserializer=gateway__pb2.BeginPhoneAuthorizationResponse.FromString,
                 _registered_method=True)
         self.CompletePhoneAuthorization = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/CompletePhoneAuthorization',
-                request_serializer=telefeeds__gateway__v1__pb2.CompletePhoneAuthorizationRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.CompletePhoneAuthorizationResponse.FromString,
+                request_serializer=gateway__pb2.CompletePhoneAuthorizationRequest.SerializeToString,
+                response_deserializer=gateway__pb2.CompletePhoneAuthorizationResponse.FromString,
                 _registered_method=True)
         self.CompletePasswordAuthorization = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/CompletePasswordAuthorization',
-                request_serializer=telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationResponse.FromString,
+                request_serializer=gateway__pb2.CompletePasswordAuthorizationRequest.SerializeToString,
+                response_deserializer=gateway__pb2.CompletePasswordAuthorizationResponse.FromString,
                 _registered_method=True)
         self.BeginExistingSessionAuthorization = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/BeginExistingSessionAuthorization',
-                request_serializer=telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationResponse.FromString,
+                request_serializer=gateway__pb2.BeginExistingSessionAuthorizationRequest.SerializeToString,
+                response_deserializer=gateway__pb2.BeginExistingSessionAuthorizationResponse.FromString,
                 _registered_method=True)
         self.CompleteExistingSessionAuthorization = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/CompleteExistingSessionAuthorization',
-                request_serializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.FromString,
+                request_serializer=gateway__pb2.CompleteExistingSessionAuthorizationRequest.SerializeToString,
+                response_deserializer=gateway__pb2.CompleteExistingSessionAuthorizationResponse.FromString,
                 _registered_method=True)
         self.CancelAuthorization = channel.unary_unary(
                 '/telefeeds.telegram.v1.TelegramGateway/CancelAuthorization',
-                request_serializer=telefeeds__gateway__v1__pb2.CancelAuthorizationRequest.SerializeToString,
-                response_deserializer=telefeeds__gateway__v1__pb2.CancelAuthorizationResponse.FromString,
+                request_serializer=gateway__pb2.CancelAuthorizationRequest.SerializeToString,
+                response_deserializer=gateway__pb2.CancelAuthorizationResponse.FromString,
                 _registered_method=True)
 
 
@@ -119,6 +129,18 @@ class TelegramGatewayServicer:
         raise NotImplementedError('Method not implemented!')
 
     def Invoke(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def UploadBotApiFile(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DownloadBotApiFile(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -195,68 +217,78 @@ def add_TelegramGatewayServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Subscribe': grpc.unary_stream_rpc_method_handler(
                     servicer.Subscribe,
-                    request_deserializer=telefeeds__gateway__v1__pb2.SubscribeRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.UpdateEnvelope.SerializeToString,
+                    request_deserializer=gateway__pb2.SubscribeRequest.FromString,
+                    response_serializer=gateway__pb2.UpdateEnvelope.SerializeToString,
             ),
             'Invoke': grpc.unary_unary_rpc_method_handler(
                     servicer.Invoke,
-                    request_deserializer=telefeeds__gateway__v1__pb2.InvokeRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.InvokeResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.InvokeRequest.FromString,
+                    response_serializer=gateway__pb2.InvokeResponse.SerializeToString,
+            ),
+            'UploadBotApiFile': grpc.stream_unary_rpc_method_handler(
+                    servicer.UploadBotApiFile,
+                    request_deserializer=gateway__pb2.BotApiFileChunk.FromString,
+                    response_serializer=gateway__pb2.BotApiUploadedFile.SerializeToString,
+            ),
+            'DownloadBotApiFile': grpc.unary_stream_rpc_method_handler(
+                    servicer.DownloadBotApiFile,
+                    request_deserializer=gateway__pb2.BotApiFileRequest.FromString,
+                    response_serializer=gateway__pb2.BotApiFileChunk.SerializeToString,
             ),
             'GetIntegrationSnapshot': grpc.unary_unary_rpc_method_handler(
                     servicer.GetIntegrationSnapshot,
-                    request_deserializer=telefeeds__gateway__v1__pb2.GetIntegrationSnapshotRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.IntegrationSnapshot.SerializeToString,
+                    request_deserializer=gateway__pb2.GetIntegrationSnapshotRequest.FromString,
+                    response_serializer=gateway__pb2.IntegrationSnapshot.SerializeToString,
             ),
             'GetSessionSnapshots': grpc.unary_unary_rpc_method_handler(
                     servicer.GetSessionSnapshots,
-                    request_deserializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.GetSessionSnapshotsResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.GetSessionSnapshotsRequest.FromString,
+                    response_serializer=gateway__pb2.GetSessionSnapshotsResponse.SerializeToString,
             ),
             'GetSessionSubscription': grpc.unary_unary_rpc_method_handler(
                     servicer.GetSessionSubscription,
-                    request_deserializer=telefeeds__gateway__v1__pb2.GetSessionSubscriptionRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.SessionSubscription.SerializeToString,
+                    request_deserializer=gateway__pb2.GetSessionSubscriptionRequest.FromString,
+                    response_serializer=gateway__pb2.SessionSubscription.SerializeToString,
             ),
             'SetSessionUpdatesEnabled': grpc.unary_unary_rpc_method_handler(
                     servicer.SetSessionUpdatesEnabled,
-                    request_deserializer=telefeeds__gateway__v1__pb2.SetSessionUpdatesEnabledRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.SessionSubscription.SerializeToString,
+                    request_deserializer=gateway__pb2.SetSessionUpdatesEnabledRequest.FromString,
+                    response_serializer=gateway__pb2.SessionSubscription.SerializeToString,
             ),
             'ListUserSessions': grpc.unary_unary_rpc_method_handler(
                     servicer.ListUserSessions,
-                    request_deserializer=telefeeds__gateway__v1__pb2.ListUserSessionsRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.ListUserSessionsResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.ListUserSessionsRequest.FromString,
+                    response_serializer=gateway__pb2.ListUserSessionsResponse.SerializeToString,
             ),
             'BeginPhoneAuthorization': grpc.unary_unary_rpc_method_handler(
                     servicer.BeginPhoneAuthorization,
-                    request_deserializer=telefeeds__gateway__v1__pb2.BeginPhoneAuthorizationRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.BeginPhoneAuthorizationResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.BeginPhoneAuthorizationRequest.FromString,
+                    response_serializer=gateway__pb2.BeginPhoneAuthorizationResponse.SerializeToString,
             ),
             'CompletePhoneAuthorization': grpc.unary_unary_rpc_method_handler(
                     servicer.CompletePhoneAuthorization,
-                    request_deserializer=telefeeds__gateway__v1__pb2.CompletePhoneAuthorizationRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.CompletePhoneAuthorizationResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.CompletePhoneAuthorizationRequest.FromString,
+                    response_serializer=gateway__pb2.CompletePhoneAuthorizationResponse.SerializeToString,
             ),
             'CompletePasswordAuthorization': grpc.unary_unary_rpc_method_handler(
                     servicer.CompletePasswordAuthorization,
-                    request_deserializer=telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.CompletePasswordAuthorizationRequest.FromString,
+                    response_serializer=gateway__pb2.CompletePasswordAuthorizationResponse.SerializeToString,
             ),
             'BeginExistingSessionAuthorization': grpc.unary_unary_rpc_method_handler(
                     servicer.BeginExistingSessionAuthorization,
-                    request_deserializer=telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.BeginExistingSessionAuthorizationRequest.FromString,
+                    response_serializer=gateway__pb2.BeginExistingSessionAuthorizationResponse.SerializeToString,
             ),
             'CompleteExistingSessionAuthorization': grpc.unary_unary_rpc_method_handler(
                     servicer.CompleteExistingSessionAuthorization,
-                    request_deserializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.CompleteExistingSessionAuthorizationRequest.FromString,
+                    response_serializer=gateway__pb2.CompleteExistingSessionAuthorizationResponse.SerializeToString,
             ),
             'CancelAuthorization': grpc.unary_unary_rpc_method_handler(
                     servicer.CancelAuthorization,
-                    request_deserializer=telefeeds__gateway__v1__pb2.CancelAuthorizationRequest.FromString,
-                    response_serializer=telefeeds__gateway__v1__pb2.CancelAuthorizationResponse.SerializeToString,
+                    request_deserializer=gateway__pb2.CancelAuthorizationRequest.FromString,
+                    response_serializer=gateway__pb2.CancelAuthorizationResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -288,8 +320,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/Subscribe',
-            telefeeds__gateway__v1__pb2.SubscribeRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.UpdateEnvelope.FromString,
+            gateway__pb2.SubscribeRequest.SerializeToString,
+            gateway__pb2.UpdateEnvelope.FromString,
             options,
             channel_credentials,
             insecure,
@@ -315,8 +347,62 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/Invoke',
-            telefeeds__gateway__v1__pb2.InvokeRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.InvokeResponse.FromString,
+            gateway__pb2.InvokeRequest.SerializeToString,
+            gateway__pb2.InvokeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def UploadBotApiFile(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_unary(
+            request_iterator,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/UploadBotApiFile',
+            gateway__pb2.BotApiFileChunk.SerializeToString,
+            gateway__pb2.BotApiUploadedFile.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DownloadBotApiFile(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/telefeeds.telegram.v1.TelegramGateway/DownloadBotApiFile',
+            gateway__pb2.BotApiFileRequest.SerializeToString,
+            gateway__pb2.BotApiFileChunk.FromString,
             options,
             channel_credentials,
             insecure,
@@ -342,8 +428,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/GetIntegrationSnapshot',
-            telefeeds__gateway__v1__pb2.GetIntegrationSnapshotRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.IntegrationSnapshot.FromString,
+            gateway__pb2.GetIntegrationSnapshotRequest.SerializeToString,
+            gateway__pb2.IntegrationSnapshot.FromString,
             options,
             channel_credentials,
             insecure,
@@ -369,8 +455,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/GetSessionSnapshots',
-            telefeeds__gateway__v1__pb2.GetSessionSnapshotsRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.GetSessionSnapshotsResponse.FromString,
+            gateway__pb2.GetSessionSnapshotsRequest.SerializeToString,
+            gateway__pb2.GetSessionSnapshotsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -396,8 +482,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/GetSessionSubscription',
-            telefeeds__gateway__v1__pb2.GetSessionSubscriptionRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.SessionSubscription.FromString,
+            gateway__pb2.GetSessionSubscriptionRequest.SerializeToString,
+            gateway__pb2.SessionSubscription.FromString,
             options,
             channel_credentials,
             insecure,
@@ -423,8 +509,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/SetSessionUpdatesEnabled',
-            telefeeds__gateway__v1__pb2.SetSessionUpdatesEnabledRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.SessionSubscription.FromString,
+            gateway__pb2.SetSessionUpdatesEnabledRequest.SerializeToString,
+            gateway__pb2.SessionSubscription.FromString,
             options,
             channel_credentials,
             insecure,
@@ -450,8 +536,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/ListUserSessions',
-            telefeeds__gateway__v1__pb2.ListUserSessionsRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.ListUserSessionsResponse.FromString,
+            gateway__pb2.ListUserSessionsRequest.SerializeToString,
+            gateway__pb2.ListUserSessionsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -477,8 +563,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/BeginPhoneAuthorization',
-            telefeeds__gateway__v1__pb2.BeginPhoneAuthorizationRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.BeginPhoneAuthorizationResponse.FromString,
+            gateway__pb2.BeginPhoneAuthorizationRequest.SerializeToString,
+            gateway__pb2.BeginPhoneAuthorizationResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -504,8 +590,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/CompletePhoneAuthorization',
-            telefeeds__gateway__v1__pb2.CompletePhoneAuthorizationRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.CompletePhoneAuthorizationResponse.FromString,
+            gateway__pb2.CompletePhoneAuthorizationRequest.SerializeToString,
+            gateway__pb2.CompletePhoneAuthorizationResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -531,8 +617,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/CompletePasswordAuthorization',
-            telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.CompletePasswordAuthorizationResponse.FromString,
+            gateway__pb2.CompletePasswordAuthorizationRequest.SerializeToString,
+            gateway__pb2.CompletePasswordAuthorizationResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -558,8 +644,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/BeginExistingSessionAuthorization',
-            telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.BeginExistingSessionAuthorizationResponse.FromString,
+            gateway__pb2.BeginExistingSessionAuthorizationRequest.SerializeToString,
+            gateway__pb2.BeginExistingSessionAuthorizationResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -585,8 +671,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/CompleteExistingSessionAuthorization',
-            telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.CompleteExistingSessionAuthorizationResponse.FromString,
+            gateway__pb2.CompleteExistingSessionAuthorizationRequest.SerializeToString,
+            gateway__pb2.CompleteExistingSessionAuthorizationResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -612,8 +698,8 @@ class TelegramGateway:
             request,
             target,
             '/telefeeds.telegram.v1.TelegramGateway/CancelAuthorization',
-            telefeeds__gateway__v1__pb2.CancelAuthorizationRequest.SerializeToString,
-            telefeeds__gateway__v1__pb2.CancelAuthorizationResponse.FromString,
+            gateway__pb2.CancelAuthorizationRequest.SerializeToString,
+            gateway__pb2.CancelAuthorizationResponse.FromString,
             options,
             channel_credentials,
             insecure,

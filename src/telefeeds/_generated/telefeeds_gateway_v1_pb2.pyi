@@ -10,6 +10,11 @@ from typing import ClassVar as _ClassVar, Optional as _Optional, Union as _Union
 
 DESCRIPTOR: _descriptor.FileDescriptor
 
+class ApiProtocol(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
+    __slots__ = ()
+    API_PROTOCOL_RAW_TL: _ClassVar[ApiProtocol]
+    API_PROTOCOL_BOT_API: _ClassVar[ApiProtocol]
+
 class AuthorizationKind(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
     __slots__ = ()
     AUTHORIZATION_KIND_UNSPECIFIED: _ClassVar[AuthorizationKind]
@@ -49,6 +54,8 @@ class PhoneAuthorizationState(int, metaclass=_enum_type_wrapper.EnumTypeWrapper)
     PHONE_AUTHORIZATION_STATE_UNSPECIFIED: _ClassVar[PhoneAuthorizationState]
     PHONE_AUTHORIZATION_STATE_PASSWORD_REQUIRED: _ClassVar[PhoneAuthorizationState]
     PHONE_AUTHORIZATION_STATE_AUTHORIZED: _ClassVar[PhoneAuthorizationState]
+API_PROTOCOL_RAW_TL: ApiProtocol
+API_PROTOCOL_BOT_API: ApiProtocol
 AUTHORIZATION_KIND_UNSPECIFIED: AuthorizationKind
 AUTHORIZATION_KIND_NATIVE: AuthorizationKind
 AUTHORIZATION_KIND_PROVIDER: AuthorizationKind
@@ -79,50 +86,112 @@ PHONE_AUTHORIZATION_STATE_PASSWORD_REQUIRED: PhoneAuthorizationState
 PHONE_AUTHORIZATION_STATE_AUTHORIZED: PhoneAuthorizationState
 
 class SubscribeRequest(_message.Message):
-    __slots__ = ("interface", "close_other", "tl_layer")
+    __slots__ = ("interface", "close_other", "tl_layer", "protocol", "session_peer_id", "allowed_updates")
     INTERFACE_FIELD_NUMBER: _ClassVar[int]
     CLOSE_OTHER_FIELD_NUMBER: _ClassVar[int]
     TL_LAYER_FIELD_NUMBER: _ClassVar[int]
+    PROTOCOL_FIELD_NUMBER: _ClassVar[int]
+    SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
+    ALLOWED_UPDATES_FIELD_NUMBER: _ClassVar[int]
     interface: int
     close_other: bool
     tl_layer: int
-    def __init__(self, interface: _Optional[int] = ..., close_other: _Optional[bool] = ..., tl_layer: _Optional[int] = ...) -> None: ...
+    protocol: ApiProtocol
+    session_peer_id: int
+    allowed_updates: _containers.RepeatedScalarFieldContainer[str]
+    def __init__(self, interface: _Optional[int] = ..., close_other: _Optional[bool] = ..., tl_layer: _Optional[int] = ..., protocol: _Optional[_Union[ApiProtocol, str]] = ..., session_peer_id: _Optional[int] = ..., allowed_updates: _Optional[_Iterable[str]] = ...) -> None: ...
 
 class UpdateEnvelope(_message.Message):
-    __slots__ = ("session_peer_id", "session_kind", "body", "received_at", "tl_layer")
+    __slots__ = ("session_peer_id", "session_kind", "body", "received_at", "tl_layer", "protocol", "delivery_id", "bot_api_update_id")
     SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
     SESSION_KIND_FIELD_NUMBER: _ClassVar[int]
     BODY_FIELD_NUMBER: _ClassVar[int]
     RECEIVED_AT_FIELD_NUMBER: _ClassVar[int]
     TL_LAYER_FIELD_NUMBER: _ClassVar[int]
+    PROTOCOL_FIELD_NUMBER: _ClassVar[int]
+    DELIVERY_ID_FIELD_NUMBER: _ClassVar[int]
+    BOT_API_UPDATE_ID_FIELD_NUMBER: _ClassVar[int]
     session_peer_id: int
     session_kind: str
     body: bytes
     received_at: _timestamp_pb2.Timestamp
     tl_layer: int
-    def __init__(self, session_peer_id: _Optional[int] = ..., session_kind: _Optional[str] = ..., body: _Optional[bytes] = ..., received_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., tl_layer: _Optional[int] = ...) -> None: ...
+    protocol: ApiProtocol
+    delivery_id: int
+    bot_api_update_id: int
+    def __init__(self, session_peer_id: _Optional[int] = ..., session_kind: _Optional[str] = ..., body: _Optional[bytes] = ..., received_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ..., tl_layer: _Optional[int] = ..., protocol: _Optional[_Union[ApiProtocol, str]] = ..., delivery_id: _Optional[int] = ..., bot_api_update_id: _Optional[int] = ...) -> None: ...
 
 class InvokeRequest(_message.Message):
-    __slots__ = ("session_peer_id", "body", "dc_id", "tl_layer")
+    __slots__ = ("session_peer_id", "body", "dc_id", "tl_layer", "protocol")
     SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
     BODY_FIELD_NUMBER: _ClassVar[int]
     DC_ID_FIELD_NUMBER: _ClassVar[int]
     TL_LAYER_FIELD_NUMBER: _ClassVar[int]
+    PROTOCOL_FIELD_NUMBER: _ClassVar[int]
     session_peer_id: int
     body: bytes
     dc_id: int
     tl_layer: int
-    def __init__(self, session_peer_id: _Optional[int] = ..., body: _Optional[bytes] = ..., dc_id: _Optional[int] = ..., tl_layer: _Optional[int] = ...) -> None: ...
+    protocol: ApiProtocol
+    def __init__(self, session_peer_id: _Optional[int] = ..., body: _Optional[bytes] = ..., dc_id: _Optional[int] = ..., tl_layer: _Optional[int] = ..., protocol: _Optional[_Union[ApiProtocol, str]] = ...) -> None: ...
 
 class InvokeResponse(_message.Message):
-    __slots__ = ("body", "error", "rpc_error")
+    __slots__ = ("body", "error", "rpc_error", "protocol")
     BODY_FIELD_NUMBER: _ClassVar[int]
     ERROR_FIELD_NUMBER: _ClassVar[int]
     RPC_ERROR_FIELD_NUMBER: _ClassVar[int]
+    PROTOCOL_FIELD_NUMBER: _ClassVar[int]
     body: bytes
     error: str
     rpc_error: TelegramRpcError
-    def __init__(self, body: _Optional[bytes] = ..., error: _Optional[str] = ..., rpc_error: _Optional[_Union[TelegramRpcError, _Mapping]] = ...) -> None: ...
+    protocol: ApiProtocol
+    def __init__(self, body: _Optional[bytes] = ..., error: _Optional[str] = ..., rpc_error: _Optional[_Union[TelegramRpcError, _Mapping]] = ..., protocol: _Optional[_Union[ApiProtocol, str]] = ...) -> None: ...
+
+class BotApiFileHeader(_message.Message):
+    __slots__ = ("session_peer_id", "file_name", "content_type", "content_length")
+    SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
+    FILE_NAME_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_LENGTH_FIELD_NUMBER: _ClassVar[int]
+    session_peer_id: int
+    file_name: str
+    content_type: str
+    content_length: int
+    def __init__(self, session_peer_id: _Optional[int] = ..., file_name: _Optional[str] = ..., content_type: _Optional[str] = ..., content_length: _Optional[int] = ...) -> None: ...
+
+class BotApiFileChunk(_message.Message):
+    __slots__ = ("header", "data")
+    HEADER_FIELD_NUMBER: _ClassVar[int]
+    DATA_FIELD_NUMBER: _ClassVar[int]
+    header: BotApiFileHeader
+    data: bytes
+    def __init__(self, header: _Optional[_Union[BotApiFileHeader, _Mapping]] = ..., data: _Optional[bytes] = ...) -> None: ...
+
+class BotApiUploadedFile(_message.Message):
+    __slots__ = ("upload_id", "file_name", "content_type", "size", "expires_at")
+    UPLOAD_ID_FIELD_NUMBER: _ClassVar[int]
+    FILE_NAME_FIELD_NUMBER: _ClassVar[int]
+    CONTENT_TYPE_FIELD_NUMBER: _ClassVar[int]
+    SIZE_FIELD_NUMBER: _ClassVar[int]
+    EXPIRES_AT_FIELD_NUMBER: _ClassVar[int]
+    upload_id: str
+    file_name: str
+    content_type: str
+    size: int
+    expires_at: _timestamp_pb2.Timestamp
+    def __init__(self, upload_id: _Optional[str] = ..., file_name: _Optional[str] = ..., content_type: _Optional[str] = ..., size: _Optional[int] = ..., expires_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...
+
+class BotApiFileRequest(_message.Message):
+    __slots__ = ("session_peer_id", "upload_id", "telegram_file_id", "offset")
+    SESSION_PEER_ID_FIELD_NUMBER: _ClassVar[int]
+    UPLOAD_ID_FIELD_NUMBER: _ClassVar[int]
+    TELEGRAM_FILE_ID_FIELD_NUMBER: _ClassVar[int]
+    OFFSET_FIELD_NUMBER: _ClassVar[int]
+    session_peer_id: int
+    upload_id: str
+    telegram_file_id: str
+    offset: int
+    def __init__(self, session_peer_id: _Optional[int] = ..., upload_id: _Optional[str] = ..., telegram_file_id: _Optional[str] = ..., offset: _Optional[int] = ...) -> None: ...
 
 class TelegramRpcError(_message.Message):
     __slots__ = ("code", "name", "value", "caused_by")

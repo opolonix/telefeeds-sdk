@@ -7,13 +7,15 @@ from aiogram.types import Message as BotMessage
 from pyrogram import Client, filters
 from pyrogram.types import Message as UserMessage
 
-from telefeeds.pyrogram import Telefeeds
+from telefeeds.aiogram import Telefeeds as AiogramTelefeeds
+from telefeeds.pyrogram import Telefeeds as PyrogramTelefeeds
 
-telefeeds = Telefeeds(token=os.environ["TELEFEEDS_TOKEN"])
+user_sessions = PyrogramTelefeeds(token=os.environ["TELEFEEDS_TOKEN"])
+bot_api = AiogramTelefeeds(token=os.environ["TELEFEEDS_TOKEN"])
 dispatcher = Dispatcher()
 
 
-@telefeeds.on_message(filters.incoming & filters.text)
+@user_sessions.on_message(filters.incoming & filters.text)
 async def user_message(client: Client, message: UserMessage) -> None:
     print("user", client.session_peer_id, message.text, flush=True)
 
@@ -24,16 +26,20 @@ async def bot_ping(message: BotMessage) -> None:
 
 
 async def main() -> None:
-    bot = Bot(token=os.environ["TELEGRAM_BOT_TOKEN"])
-    try:
-        async with telefeeds:
-            assert telefeeds.subscription_task is not None
+    session_peer_id = int(os.environ["TELEGRAM_BOT_ID"])
+    bot = Bot(
+        token=f"{session_peer_id}:{'A' * 35}",
+        session=bot_api.aiogram_session(session_peer_id),
+    )
+    async with user_sessions, bot_api:
+        assert user_sessions.subscription_task is not None
+        try:
             await asyncio.gather(
-                telefeeds.subscription_task,
-                dispatcher.start_polling(bot),
+                user_sessions.subscription_task,
+                bot_api.start(dispatcher, session_peer_id, bot=bot),
             )
-    finally:
-        await bot.session.close()
+        finally:
+            await bot.session.close()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from collections.abc import AsyncIterator, Awaitable, Sequence
 from datetime import timezone
 from typing import TypeVar
@@ -187,6 +188,121 @@ class TelefeedsClient:
                     received_at=received_at,
                     tl_layer=event.tl_layer,
                 )
+        except grpc.aio.AioRpcError as error:
+            raise gateway_error(error) from error
+
+    async def subscribe_bot_api(
+        self,
+        session_peer_id: int,
+        *,
+        interface: int | None = None,
+        close_other: bool | None = None,
+        allowed_updates: Sequence[str] = (),
+    ) -> AsyncIterator[bytes]:
+        request = gateway.SubscribeRequest(
+            protocol=gateway.API_PROTOCOL_BOT_API,
+            session_peer_id=session_peer_id,
+            allowed_updates=allowed_updates,
+        )
+        if interface is not None:
+            request.interface = interface
+        if close_other is not None:
+            request.close_other = close_other
+        try:
+            call = self.require_stub().Subscribe(request, metadata=self.metadata)
+            await call.initial_metadata()
+            async for event in call:
+                yield event.body
+        except grpc.aio.AioRpcError as error:
+            raise gateway_error(error) from error
+
+    async def invoke_bot_api(
+        self,
+        session_peer_id: int,
+        method: str,
+        parameters: dict[str, object],
+        *,
+        files: dict[str, str] | None = None,
+        timeout: float | None = None,
+    ) -> bytes:
+        body = json.dumps(
+            {
+                "method": method,
+                "parameters": parameters,
+                "files": files or {},
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode()
+        response = await rpc_result(
+            self.require_stub().Invoke(
+                gateway.InvokeRequest(
+                    session_peer_id=session_peer_id,
+                    body=body,
+                    protocol=gateway.API_PROTOCOL_BOT_API,
+                ),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
+        )
+        return response.body
+
+    async def upload_bot_api_file(
+        self,
+        session_peer_id: int,
+        file_name: str,
+        chunks: AsyncIterator[bytes],
+        *,
+        content_type: str | None = None,
+        content_length: int | None = None,
+        timeout: float | None = None,
+    ) -> str:
+        async def requests() -> AsyncIterator[gateway.BotApiFileChunk]:
+            header = gateway.BotApiFileHeader(
+                session_peer_id=session_peer_id,
+                file_name=file_name,
+            )
+            if content_type is not None:
+                header.content_type = content_type
+            if content_length is not None:
+                header.content_length = content_length
+            yield gateway.BotApiFileChunk(header=header)
+            async for chunk in chunks:
+                if chunk:
+                    yield gateway.BotApiFileChunk(data=chunk)
+
+        response = await rpc_result(
+            self.require_stub().UploadBotApiFile(
+                requests(),
+                metadata=self.metadata,
+                timeout=self.default_timeout if timeout is None else timeout,
+            )
+        )
+        return response.upload_id
+
+    async def download_bot_api_file(
+        self,
+        session_peer_id: int,
+        *,
+        upload_id: str | None = None,
+        telegram_file_id: str | None = None,
+        offset: int | None = None,
+    ) -> AsyncIterator[bytes]:
+        request = gateway.BotApiFileRequest(session_peer_id=session_peer_id)
+        if upload_id is not None:
+            request.upload_id = upload_id
+        elif telegram_file_id is not None:
+            request.telegram_file_id = telegram_file_id
+        else:
+            raise ValueError("upload_id or telegram_file_id is required")
+        if offset is not None:
+            request.offset = offset
+        try:
+            call = self.require_stub().DownloadBotApiFile(request, metadata=self.metadata)
+            await call.initial_metadata()
+            async for chunk in call:
+                if chunk.WhichOneof("payload") == "data":
+                    yield chunk.data
         except grpc.aio.AioRpcError as error:
             raise gateway_error(error) from error
 

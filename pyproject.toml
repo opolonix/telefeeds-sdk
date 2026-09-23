@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "telefeeds-sdk"
-version = "0.3.1"
+version = "0.4.0"
 description = "Async Python SDK and Pyrogram-compatible client for Telefeeds"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -32,6 +32,9 @@ dependencies = [
   "protobuf>=7.36.1,<8",
   "typing-extensions>=4.4",
 ]
+
+[project.optional-dependencies]
+aiogram = ["aiogram>=3.31,<4"]
 
 [project.urls]
 Documentation = "https://telegram.telefeeds.ru/"

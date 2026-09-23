@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package telefeeds.telegram.v1;
 
+option go_package = "github.com/mtgo-labs/mtgo-bot-api/internal/gatewaypb;gatewaypb";
+
 import "google/protobuf/timestamp.proto";
 
 // Public Telegram user-session gateway. Every RPC requires the metadata header
@@ -11,6 +13,8 @@ import "google/protobuf/timestamp.proto";
 service TelegramGateway {
   rpc Subscribe(SubscribeRequest) returns (stream UpdateEnvelope);
   rpc Invoke(InvokeRequest) returns (InvokeResponse);
+  rpc UploadBotApiFile(stream BotApiFileChunk) returns (BotApiUploadedFile);
+  rpc DownloadBotApiFile(BotApiFileRequest) returns (stream BotApiFileChunk);
   rpc GetIntegrationSnapshot(GetIntegrationSnapshotRequest) returns (IntegrationSnapshot);
   rpc GetSessionSnapshots(GetSessionSnapshotsRequest) returns (GetSessionSnapshotsResponse);
   rpc GetSessionSubscription(GetSessionSubscriptionRequest) returns (SessionSubscription);
@@ -24,10 +28,18 @@ service TelegramGateway {
   rpc CancelAuthorization(CancelAuthorizationRequest) returns (CancelAuthorizationResponse);
 }
 
+enum ApiProtocol {
+  API_PROTOCOL_RAW_TL = 0;
+  API_PROTOCOL_BOT_API = 1;
+}
+
 message SubscribeRequest {
   optional int32 interface = 1;
   optional bool close_other = 2;
   int32 tl_layer = 3;
+  ApiProtocol protocol = 4;
+  optional int64 session_peer_id = 5;
+  repeated string allowed_updates = 6;
 }
 
 message UpdateEnvelope {
@@ -36,6 +48,9 @@ message UpdateEnvelope {
   bytes body = 3;
   google.protobuf.Timestamp received_at = 4;
   int32 tl_layer = 5;
+  ApiProtocol protocol = 6;
+  optional uint64 delivery_id = 7;
+  optional int64 bot_api_update_id = 8;
 }
 
 message InvokeRequest {
@@ -43,12 +58,45 @@ message InvokeRequest {
   bytes body = 2;
   optional int32 dc_id = 3;
   int32 tl_layer = 4;
+  ApiProtocol protocol = 5;
 }
 
 message InvokeResponse {
   bytes body = 1;
   optional string error = 2;
   optional TelegramRpcError rpc_error = 3;
+  ApiProtocol protocol = 4;
+}
+
+message BotApiFileHeader {
+  int64 session_peer_id = 1;
+  string file_name = 2;
+  optional string content_type = 3;
+  optional uint64 content_length = 4;
+}
+
+message BotApiFileChunk {
+  oneof payload {
+    BotApiFileHeader header = 1;
+    bytes data = 2;
+  }
+}
+
+message BotApiUploadedFile {
+  string upload_id = 1;
+  string file_name = 2;
+  optional string content_type = 3;
+  uint64 size = 4;
+  google.protobuf.Timestamp expires_at = 5;
+}
+
+message BotApiFileRequest {
+  int64 session_peer_id = 1;
+  oneof source {
+    string upload_id = 2;
+    string telegram_file_id = 3;
+  }
+  optional uint64 offset = 4;
 }
 
 message TelegramRpcError {

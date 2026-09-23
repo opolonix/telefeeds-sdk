@@ -8,6 +8,36 @@ SDK не устанавливает Pyrogram. Приложение само вы
 pip install telefeeds-sdk kurigram
 ```
 
+Для aiogram установите отдельную опцию пакета:
+
+```bash
+pip install 'telefeeds-sdk[aiogram]'
+```
+
+## aiogram через Telefeeds
+
+`telefeeds.aiogram.Telefeeds` предоставляет стандартную aiogram-сессию. HTTP Bot API и `getUpdates` не используются: методы, файлы и JSON-апдейты проходят через постоянный gRPC-канал ClientHub.
+
+```python
+from aiogram import Dispatcher
+from aiogram.filters import Command
+from aiogram.types import Message
+from telefeeds.aiogram import Telefeeds
+
+telefeeds = Telefeeds(token="telefeeds_...")
+dispatcher = Dispatcher()
+
+@dispatcher.message(Command("ping"))
+async def ping(message: Message) -> None:
+    await message.answer("pong")
+
+telefeeds.run(dispatcher, session_peer_id=123456789)
+```
+
+Если жизненным циклом управляет приложение, используйте `await telefeeds.start(...)`. Для уже созданного `aiogram.Bot` передайте `session=telefeeds.aiogram_session(bot_id)`. `session_peer_id` — Telegram ID связанного с интеграцией бота; на связи должны быть включены разрешения на апдейты и API.
+
+Загрузка `InputFile` и скачивание файлов aiogram идут отдельными потоковыми RPC. Временная загрузка живёт один час, передаётся частями и не собирается целиком в памяти SDK или ClientHub.
+
 ## Быстрый старт
 
 ```python
@@ -152,6 +182,7 @@ for session in page.sessions:
 `Router` группирует обработчики и подключается через `app.include_router(router)`. Доступны штатные фильтры и типы установленного Pyrogram-совместимого пакета.
 
 - [Минимальный Pyrogram-клиент](examples/pyrogram_client.py)
+- [aiogram через Telefeeds](examples/aiogram_bot.py)
 - [Telefeeds и aiogram в одном процессе](examples/pyrogram_and_aiogram.py)
 - [Регистрация пользовательского аккаунта](examples/register_account.py)
 
