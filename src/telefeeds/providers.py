@@ -6,6 +6,7 @@ import asyncio
 import inspect
 import json
 import logging
+import math
 import re
 from dataclasses import dataclass
 from typing import Callable
@@ -29,6 +30,7 @@ class BackStream:
         headers: type[BaseModel] | None,
         offset: int,
         source_revision: str = "",
+        export_id: str = "",
     ):
         self.request_id = request_id
         self.send = send
@@ -36,6 +38,8 @@ class BackStream:
         self.headers = headers
         self.offset = offset
         self.source_revision = source_revision
+        self.export_id = export_id
+        self.progress_percent: float | None = None
         self.rows: list[dict] = []
         self.bytes = 0
 
@@ -47,7 +51,15 @@ class BackStream:
         username: str | None = None,
         lang_code: str | None = None,
         offset: int | None = None,
+        progress_percent: float | None = None,
     ) -> None:
+        if progress_percent is not None and (
+            isinstance(progress_percent, bool)
+            or not isinstance(progress_percent, (int, float))
+            or not math.isfinite(progress_percent)
+            or not 0 <= progress_percent <= 100
+        ):
+            raise ValueError("progress_percent must be between 0 and 100")
         if self.headers is not None:
             if row is None or not isinstance(row, self.headers):
                 raise TypeError("dataset row must match its headers model")
@@ -72,6 +84,8 @@ class BackStream:
         self.rows.append(value)
         self.bytes += size
         self.offset += 1
+        if progress_percent is not None:
+            self.progress_percent = progress_percent
 
     async def flush(self) -> None:
         if not self.rows:
@@ -86,6 +100,7 @@ class BackStream:
                         "rows": self.rows,
                         "next_offset": self.offset,
                         "source_revision": self.source_revision,
+                        "progress_percent": self.progress_percent,
                     },
                     ensure_ascii=False,
                 ),
@@ -272,6 +287,7 @@ class ProviderRegistry:
                 headers=provider.headers,
                 offset=offset,
                 source_revision=revision,
+                export_id=str(request.get("export_id") or ""),
             )
             kwargs = {"offset": offset} if provider.headers else {}
             if request.get("args"):

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fproviders.proto\x12\x16telefeeds.providers.v1\"U\n\rProviderFrame\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0c\n\x04kind\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\x12\x14\n\x0cinterface_id\x18\x04 \x01(\x05\"\xd1\x01\n\x0cProviderCall\x12\x11\n\tclient_id\x18\x01 \x01(\x03\x12\x0e\n\x06\x62ot_id\x18\x02 \x01(\x03\x12\x11\n\toperation\x18\x03 \x01(\t\x12\x16\n\x0eintegration_id\x18\x04 \x01(\t\x12\x19\n\x0cinterface_id\x18\x05 \x01(\x05H\x00\x88\x01\x01\x12\x0b\n\x03key\x18\x06 \x01(\t\x12\x11\n\targs_json\x18\x07 \x01(\t\x12\x0e\n\x06offset\x18\x08 \x01(\x04\x12\x17\n\x0fsource_revision\x18\t \x01(\tB\x0f\n\r_interface_id\"m\n\rProviderEvent\x12\x16\n\x0eintegration_id\x18\x01 \x01(\t\x12\x14\n\x0cinterface_id\x18\x02 \x01(\x05\x12\x12\n\nrequest_id\x18\x03 \x01(\t\x12\x0c\n\x04kind\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\t2n\n\x0fProviderGateway\x12[\n\x07\x43onnect\x12%.telefeeds.providers.v1.ProviderFrame\x1a%.telefeeds.providers.v1.ProviderFrame(\x01\x30\x01\x32\x66\n\rProviderAdmin\x12U\n\x04\x43\x61ll\x12$.telefeeds.providers.v1.ProviderCall\x1a%.telefeeds.providers.v1.ProviderEvent0\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fproviders.proto\x12\x16telefeeds.providers.v1\"U\n\rProviderFrame\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0c\n\x04kind\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\x12\x14\n\x0cinterface_id\x18\x04 \x01(\x05\"\xe4\x01\n\x0cProviderCall\x12\x11\n\tclient_id\x18\x01 \x01(\x03\x12\x0e\n\x06\x62ot_id\x18\x02 \x01(\x03\x12\x11\n\toperation\x18\x03 \x01(\t\x12\x16\n\x0eintegration_id\x18\x04 \x01(\t\x12\x19\n\x0cinterface_id\x18\x05 \x01(\x05H\x00\x88\x01\x01\x12\x0b\n\x03key\x18\x06 \x01(\t\x12\x11\n\targs_json\x18\x07 \x01(\t\x12\x0e\n\x06offset\x18\x08 \x01(\x04\x12\x17\n\x0fsource_revision\x18\t \x01(\t\x12\x11\n\texport_id\x18\n \x01(\tB\x0f\n\r_interface_id\"m\n\rProviderEvent\x12\x16\n\x0eintegration_id\x18\x01 \x01(\t\x12\x14\n\x0cinterface_id\x18\x02 \x01(\x05\x12\x12\n\nrequest_id\x18\x03 \x01(\t\x12\x0c\n\x04kind\x18\x04 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\t2n\n\x0fProviderGateway\x12[\n\x07\x43onnect\x12%.telefeeds.providers.v1.ProviderFrame\x1a%.telefeeds.providers.v1.ProviderFrame(\x01\x30\x01\x32\x66\n\rProviderAdmin\x12U\n\x04\x43\x61ll\x12$.telefeeds.providers.v1.ProviderCall\x1a%.telefeeds.providers.v1.ProviderEvent0\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -34,11 +34,11 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_PROVIDERFRAME']._serialized_start=43
   _globals['_PROVIDERFRAME']._serialized_end=128
   _globals['_PROVIDERCALL']._serialized_start=131
-  _globals['_PROVIDERCALL']._serialized_end=340
-  _globals['_PROVIDEREVENT']._serialized_start=342
-  _globals['_PROVIDEREVENT']._serialized_end=451
-  _globals['_PROVIDERGATEWAY']._serialized_start=453
-  _globals['_PROVIDERGATEWAY']._serialized_end=563
-  _globals['_PROVIDERADMIN']._serialized_start=565
-  _globals['_PROVIDERADMIN']._serialized_end=667
+  _globals['_PROVIDERCALL']._serialized_end=359
+  _globals['_PROVIDEREVENT']._serialized_start=361
+  _globals['_PROVIDEREVENT']._serialized_end=470
+  _globals['_PROVIDERGATEWAY']._serialized_start=472
+  _globals['_PROVIDERGATEWAY']._serialized_end=582
+  _globals['_PROVIDERADMIN']._serialized_start=584
+  _globals['_PROVIDERADMIN']._serialized_end=686
 # @@protoc_insertion_point(module_scope)

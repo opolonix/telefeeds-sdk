@@ -36,6 +36,8 @@ telefeeds.run(dispatcher, session_peer_id=123456789)
 
 Если жизненным циклом управляет приложение, используйте `await telefeeds.start(...)`. Для уже созданного `aiogram.Bot` передайте `session=telefeeds.aiogram_session(bot_id)`. `session_peer_id` — Telegram ID связанного с интеграцией бота; на связи должны быть включены разрешения на апдейты и API.
 
+При временной недоступности ClientHub aiogram-подписка не завершает процесс: SDK пишет `WARNING` в лог и повторно подключается с задержкой от `reconnect_initial_delay=0.5` до `reconnect_max_delay=30.0` секунд. После успешного получения апдейта задержка сбрасывается. Ошибки авторизации и явное вытеснение подписки через `close_other` не повторяются.
+
 Загрузка `InputFile` и скачивание файлов aiogram идут отдельными потоковыми RPC. Временная загрузка живёт один час, передаётся частями и не собирается целиком в памяти SDK или ClientHub.
 
 ## Быстрый старт
@@ -210,7 +212,7 @@ twine check dist/*
 ```
 
 Публикация релиза запускается GitHub Actions после создания GitHub Release. Для неё нужен Trusted Publisher проекта `telefeeds-sdk` в PyPI.
-# Наборы аудитории и CSV-выгрузки (SDK 0.3.1)
+# Наборы аудитории и CSV-выгрузки (SDK 0.4.1)
 
 Зарегистрируйте обработчики до запуска клиента. Интеграцию нужно связать с ботом
 в интерфейсе Telefeeds. Каталог запрашивается один раз на логический `interface`,
@@ -247,8 +249,11 @@ async def revision(bot_id: int):
 @client.make_dataset("clients", title="Клиенты", headers=ClientRow,
                      revision_call=revision)
 async def clients(bot_id: int, stream: BackStream, offset: int = 0):
+    print("Идентификатор выгрузки:", stream.export_id)
+    total = max(1, await repository.count_clients(bot_id))
     async for index, user in repository.clients_at_offset(bot_id, offset):
-        await stream.push(ClientRow(name=user.name), offset=index)
+        await stream.push(ClientRow(name=user.name), offset=index,
+                          progress_percent=min(100, (index + 1) * 100 / total))
 ```
 
 `repository` — ваш источник данных. `username` и `lang_code` необязательны.
@@ -265,6 +270,9 @@ async def clients(bot_id: int, stream: BackStream, offset: int = 0):
 не сохраняются. Браузер скачивает оставшуюся часть отдельным CSV с заголовками;
 для цельного файла нужно начать загрузку заново. Смещение означает переданные
 сервером строки, а не подтверждение записи файла браузером.
+`stream.export_id` содержит UUID конкретной выгрузки; процент необязателен и
+передаётся рядом с `next_offset` в каждом пакете. Одновременно допускаются
+не более двух выгрузок для одного бота, даже если источники разные.
 
 Для обычного доступа к Telegram бот использует тот же SDK (`Invoke` и апдейты),
 но разрешения «Присылать апдейты» и «Разрешить взаимодействие с API» включаются

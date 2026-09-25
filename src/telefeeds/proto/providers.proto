@@ -23,6 +23,7 @@ message ProviderCall {
   string args_json = 7;
   uint64 offset = 8;
   string source_revision = 9;
+  string export_id = 10;
 }
 message ProviderEvent {
   string integration_id = 1;
